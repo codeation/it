@@ -7,6 +7,8 @@
 
 // main
 
+extern char *it_version;
+
 extern GtkWidget *app;
 extern GtkWidget *layout;
 

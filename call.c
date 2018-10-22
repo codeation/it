@@ -3,6 +3,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// driver version
+
+void commandVersion() {
+    int16_t length = strlen(it_version);
+    socket_input_write(&length, sizeof length);
+    socket_input_write(it_version, length);
+}
+
 // clear command
 
 static struct { int16_t id; } windowid;
@@ -148,6 +156,9 @@ void callcommand(char command) {
         break;
     case 'X':
         gtk_main_quit();
+        break;
+    case 'V':
+        commandVersion();
         break;
 
     // window

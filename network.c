@@ -65,18 +65,18 @@ static GIOChannel *chan = NULL;
 
 void network_init() {
     socket_listen_input = socket_listen(1101);
-    socket_listen_output = socket_listen(1102);
     socket_input = accept(socket_listen_input, NULL, NULL);
     chan = socket_chan_open(socket_input);
     g_io_add_watch(chan, G_IO_IN, readchan, NULL);
+    socket_listen_output = socket_listen(1102);
     socket_output = accept(socket_listen_output, NULL, NULL);
 }
 
 void network_done() {
     close(socket_output);
+    close(socket_listen_output);
     socket_chan_close(chan);
     g_io_channel_unref(chan);
-    close(socket_listen_output);
     close(socket_listen_input);
 }
 
