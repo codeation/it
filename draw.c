@@ -1,6 +1,7 @@
 #include "idlist.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,6 +97,8 @@ struct _font_elem {
 
 static id_list *font_list = NULL;
 
+font_elem *get_font(int id) { return (font_elem *)id_list_get_data(font_list, id); }
+
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight,
                    int stretch) {
     font_elem *e = malloc(sizeof(font_elem));
@@ -122,12 +125,21 @@ void font_elem_destroy() {
     }
 }
 
-font_elem *get_font(int id) { return (font_elem *)id_list_get_data(font_list, id); }
+void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *descent) {
+    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
+    pango_layout_set_font_description(layout, get_font(fontid)->desc);
+    *baseline = (int16_t)rintl((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
+    PangoFontMetrics *metrics =
+        pango_context_get_metrics(pango_layout_get_context(layout), get_font(fontid)->desc, NULL);
+    *ascent = (int16_t)rintl((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
+    *descent = (int16_t)rintl((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
+    pango_font_metrics_unref(metrics);
+    g_object_unref(layout);
+}
 
 // text split
 
 int16_t *font_split_text(int fontid, char *text, int edge) {
-    // return NULL;
     PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
@@ -141,7 +153,21 @@ int16_t *font_split_text(int fontid, char *text, int edge) {
         PangoLayoutLine *line = e->data;
         *pos++ = (int16_t)(line->length);
     }
+    g_object_unref(layout);
     return out;
+}
+
+// text rect
+
+void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
+    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
+    pango_layout_set_font_description(layout, get_font(fontid)->desc);
+    pango_layout_set_text(layout, text, -1);
+    int w, h;
+    pango_layout_get_pixel_size(layout, &w, &h);
+    *width = (int16_t)w;
+    *height = (int16_t)h;
+    g_object_unref(layout);
 }
 
 // text

@@ -82,6 +82,11 @@ static struct {
 void setFont(void *family) {
     font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight,
                   font.stretch);
+    int16_t baseline, ascent, descent;
+    get_font_metrics(font.id, &baseline, &ascent, &descent);
+    socket_input_write(&baseline, sizeof baseline);
+    socket_input_write(&ascent, sizeof ascent);
+    socket_input_write(&descent, sizeof descent);
 }
 
 void commandFont() { readalloccall(&font, sizeof font, setFont); }
@@ -106,6 +111,19 @@ void splitText(void *text) {
 }
 
 void commandSplit() { readalloccall(&split, sizeof split, splitText); }
+
+// text rect
+
+static struct { int16_t fontid; } textrect;
+
+void rectText(void *text) {
+    int16_t width, height;
+    font_rect_text(textrect.fontid, text, &width, &height);
+    socket_input_write(&width, sizeof width);
+    socket_input_write(&height, sizeof width);
+}
+
+void commandRect() { readalloccall(&textrect, sizeof textrect, rectText); }
 
 // app window size
 
@@ -190,6 +208,9 @@ void callcommand(char command) {
         break;
     case 'P':
         commandSplit();
+        break;
+    case 'R':
+        commandRect();
         break;
     }
 }

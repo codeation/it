@@ -43,6 +43,14 @@ void *window_get_data(int id);
 void window_size(int id, int x, int y, int width, int height);
 void window_redraw(int id);
 
+// font
+
+void font_elem_add(int id, int height, char *family, int style, int variant, int weight,
+                   int stretch);
+void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *descent);
+int16_t *font_split_text(int fontid, char *text, int edge);
+void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height);
+
 // draw
 
 void *draw_data_new();
@@ -53,10 +61,6 @@ void elem_clear(int id);
 void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b);
 void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b);
-
-void font_elem_add(int id, int height, char *family, int style, int variant, int weight,
-                   int stretch);
-int16_t *font_split_text(int fontid, char *text, int edge);
 
 gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data);
 
