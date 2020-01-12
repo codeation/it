@@ -48,7 +48,7 @@ void socket_chan_close(GIOChannel *chan) {
         ;
 
     if (shutdown(s, SHUT_RDWR) == -1) {
-        perror("shutdown failed");
+        /*perror("shutdown failed")*/;
     }
     if (close(s) == -1) {
         perror("close failed");

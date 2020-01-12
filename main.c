@@ -10,6 +10,9 @@ int main(int argc, char **argv) {
     app = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_signal_connect(app, "destroy", G_CALLBACK(on_destroy), NULL);
     g_signal_connect(app, "key_press_event", G_CALLBACK(s_keypress), NULL);
+    g_signal_connect(app, "button_press_event", G_CALLBACK(s_button), NULL);
+    g_signal_connect(app, "button_release_event", G_CALLBACK(s_button), NULL);
+    g_signal_connect(app, "motion_notify_event", G_CALLBACK(s_motion), NULL);
 
     layout = gtk_layout_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(app), layout);

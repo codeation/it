@@ -20,7 +20,9 @@ void draw_elem_add(id_list *list, void *data) { id_list_append(list, 0, data); }
 
 // general
 
-typedef struct { int type; } draw_type;
+typedef struct {
+    int type;
+} draw_type;
 
 // fill
 

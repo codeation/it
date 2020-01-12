@@ -162,6 +162,18 @@ void setWindow() {
 
 void commandWindow() { readbuffcall(&window, sizeof window, setWindow); }
 
+// window size
+
+void setWindowSize() { window_size(window.id, window.x, window.y, window.width, window.height); }
+
+void commandWindowSize() { readbuffcall(&window, sizeof window, setWindowSize); }
+
+// drop window command
+
+void dropWindow() { window_destroy(windowid.id); }
+
+void commandWindowDrop() { readbuffcall(&windowid, sizeof windowid, dropWindow); }
+
 // dispatch
 
 void callcommand(char command) {
@@ -183,6 +195,12 @@ void callcommand(char command) {
     // window
     case 'D':
         commandWindow();
+        break;
+    case 'Z':
+        commandWindowSize();
+        break;
+    case 'O':
+        commandWindowDrop();
         break;
 
     // draw
