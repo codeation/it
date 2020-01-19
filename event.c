@@ -12,12 +12,13 @@ typedef struct {
 
 #define GENERAL_EVENT_DESTROY 1
 
-void on_destroy(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED) {
+gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED) {
     char command_type = 'g';
     general_event e;
     e.id = GENERAL_EVENT_DESTROY;
     socket_output_write(&command_type, sizeof command_type);
     socket_output_write(&e, sizeof e);
+    return TRUE;
 }
 
 // Keyboard events

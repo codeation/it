@@ -28,7 +28,7 @@ void window_destroy(int id) {
     window_elem *w = id_list_remove(window_list, id);
     draw_destroy(w->data);
     draw_data_free(w->data);
-    gtk_widget_destroy(w->draw);
+    gtk_widget_destroy(GTK_WIDGET(w->draw));
     free(w);
 }
 

@@ -27,10 +27,10 @@ gboolean readchan(GIOChannel *source, GIOCondition condition, gpointer data);
 
 // event
 
+gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED);
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);
-void on_destroy(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED);
 
 // call
 

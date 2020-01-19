@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     gtk_init(NULL, NULL);
 
     app = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    g_signal_connect(app, "destroy", G_CALLBACK(on_destroy), NULL);
+    g_signal_connect(app, "delete-event", G_CALLBACK(on_delete), NULL);
     g_signal_connect(app, "key_press_event", G_CALLBACK(s_keypress), NULL);
     g_signal_connect(app, "button_press_event", G_CALLBACK(s_button), NULL);
     g_signal_connect(app, "button_release_event", G_CALLBACK(s_button), NULL);
