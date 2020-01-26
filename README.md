@@ -6,7 +6,7 @@ Impress terminal application, part of cross-platform GUI Library for Go. See htt
 Notes:
 
 - This project is still in the early stages of development and is not yet in a usable state.
-- The project tested on Debian 9 and MacOS 10.13.
+- The project tested on Debian 9, 10 and MacOS 10.13, 10.14.
 
 ## Installation
 
