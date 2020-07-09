@@ -71,6 +71,37 @@ void setText(void *text) {
 
 void commandText() { readalloccall(&point, sizeof point, setText); }
 
+// draw image
+
+static struct {
+    int16_t id;
+    int16_t x, y;
+    int16_t imageid;
+} image;
+
+void setImage() { elem_image_add(image.id, image.x, image.y, image.imageid); }
+
+void commandImage() { readbuffcall(&image, sizeof image, setImage); }
+
+// load image
+
+static struct {
+    int16_t id;
+    int16_t width, height;
+} imageAdd;
+
+void setImageAdd(void *data) { image_add(imageAdd.id, imageAdd.width, imageAdd.height, data); }
+
+void commandImageAdd() { readalloccall(&imageAdd, sizeof imageAdd, setImageAdd); }
+
+// remove image
+
+static struct { int16_t id; } imageid;
+
+void setImageRem() { image_rem(imageid.id); }
+
+void commandImageRem() { readbuffcall(&imageid, sizeof imageid, setImageRem); }
+
 // load font
 
 static struct {
@@ -142,7 +173,10 @@ void commandSize() { readbuffcall(&size, sizeof size, setSize); }
 
 // app window title
 
-void setTitle(void *buff) { gtk_window_set_title(GTK_WINDOW(app), buff); }
+void setTitle(void *buff) {
+    gtk_window_set_title(GTK_WINDOW(app), buff);
+    free(buff);
+}
 
 void commandTitle() { readalloccall(NULL, 0, setTitle); }
 
@@ -218,6 +252,17 @@ void callcommand(char command) {
         break;
     case 'U':
         commandText();
+        break;
+    case 'I':
+        commandImage();
+        break;
+
+    // image
+    case 'B':
+        commandImageAdd();
+        break;
+    case 'M':
+        commandImageRem();
         break;
 
     // font

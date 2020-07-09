@@ -45,6 +45,11 @@ void *window_get_data(int id);
 void window_size(int id, int x, int y, int width, int height);
 void window_redraw(int id);
 
+// image
+
+void image_add(int id, int width, int height, unsigned char *data);
+void image_rem(int id);
+
 // font
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight,
@@ -62,6 +67,7 @@ void draw_destroy(void *v);
 void elem_clear(int id);
 void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b);
 void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b);
+void elem_image_add(int id, int x, int y, int imageid);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b);
 
 gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data);

@@ -14,13 +14,13 @@ void readbuffcall(void *buffer, int size, void (*f)()) {
 }
 
 static void (*readAllocFunc)(void *);
-static int16_t length = 0;
+static int32_t length = 0;
 static char *data = NULL;
 
 static void alloccall() {
     data[length] = 0;
-    readAllocFunc(data);
-    free(data);
+    readAllocFunc(data); // func must free the data after all
+    // free(data);
 }
 
 static void readdata() {

@@ -9,6 +9,7 @@
 #define DRAW_ELEM_FILL 1
 #define DRAW_ELEM_LINE 2
 #define DRAW_ELEM_TEXT 3
+#define DRAW_ELEM_IMAGE 4
 
 // draw elements
 
@@ -88,6 +89,73 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b) 
     draw_elem_add(window_get_data(id), e);
 }
 
+// image cache
+
+typedef struct _image_elem image_elem;
+
+struct _image_elem {
+    unsigned char *data;
+    cairo_surface_t *image;
+};
+
+static id_list *image_list = NULL;
+
+image_elem *get_image(int id) { return (image_elem *)id_list_get_data(image_list, id); }
+
+void image_add(int id, int width, int height, unsigned char *data) {
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    for (int i = 0; i < height; i++) {
+        unsigned char *p = data + i * stride;
+        for (int j = 0; j < width; j++) {
+            unsigned char r = p[0];
+            p[0] = p[2];
+            p[2] = r;
+            p += 4;
+        }
+    }
+    image_elem *e = malloc(sizeof(image_elem));
+    e->data = data;
+    e->image =
+        cairo_image_surface_create_for_data(e->data, CAIRO_FORMAT_ARGB32, width, height, stride);
+    if (image_list == NULL)
+        image_list = id_list_new();
+    id_list_append(image_list, id, e);
+}
+
+void image_rem(int id) {
+    image_elem *e = id_list_remove(image_list, id);
+    cairo_surface_destroy(e->image);
+    free(e->data);
+    free(e);
+}
+
+// image drawing
+
+typedef struct {
+    int type;
+    int x, y;
+    int imageid;
+} elem_image;
+
+void elem_image_draw(cairo_t *cr, elem_image *e) {
+    cairo_save(cr);
+    image_elem *ie = get_image(e->imageid);
+    cairo_set_source_surface(cr, ie->image, e->x, e->y);
+    cairo_paint(cr);
+    cairo_restore(cr);
+}
+
+void elem_image_destroy(elem_image *e) {}
+
+void elem_image_add(int id, int x, int y, int imageid) {
+    elem_image *e = malloc(sizeof(elem_image));
+    e->type = DRAW_ELEM_IMAGE;
+    e->x = x;
+    e->y = y;
+    e->imageid = imageid;
+    draw_elem_add(window_get_data(id), e);
+}
+
 // font
 
 typedef struct _font_elem font_elem;
@@ -115,6 +183,7 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     if (font_list == NULL)
         font_list = id_list_new();
     id_list_append(font_list, id, e);
+    free(family);
 }
 
 void font_elem_destroy() {
@@ -156,6 +225,7 @@ int16_t *font_split_text(int fontid, char *text, int edge) {
         *pos++ = (int16_t)(line->length);
     }
     g_object_unref(layout);
+    free(text);
     return out;
 }
 
@@ -170,6 +240,7 @@ void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
     *width = (int16_t)w;
     *height = (int16_t)h;
     g_object_unref(layout);
+    free(text);
 }
 
 // text
@@ -207,9 +278,7 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->type = DRAW_ELEM_TEXT;
     e->x = x;
     e->y = y;
-    int length = strlen(text);
-    e->text = malloc(length + 1);
-    memcpy(e->text, text, length + 1);
+    e->text = text;
     e->fontid = fontid;
     e->r = (double)r / 255.0;
     e->g = (double)g / 255.0;
@@ -237,6 +306,9 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
         case DRAW_ELEM_TEXT:
             elem_text_draw(cr, id_list_elem_data(e));
             break;
+        case DRAW_ELEM_IMAGE:
+            elem_image_draw(cr, id_list_elem_data(e));
+            break;
         }
     }
     return FALSE;
@@ -258,6 +330,9 @@ void draw_destroy(void *data) {
             break;
         case DRAW_ELEM_TEXT:
             elem_text_destroy(e);
+            break;
+        case DRAW_ELEM_IMAGE:
+            elem_image_destroy(e);
             break;
         }
         free(e);
