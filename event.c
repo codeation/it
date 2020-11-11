@@ -89,3 +89,13 @@ gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     socket_output_write(&e, sizeof e);
     return TRUE;
 }
+
+// Menu events
+
+void s_menu_action(char *name) {
+    char command_type = 'u';
+    socket_output_write(&command_type, sizeof command_type);
+    int16_t length = strlen(name);
+    socket_output_write(&length, sizeof length);
+    socket_output_write(name, length);
+}

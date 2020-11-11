@@ -197,7 +197,7 @@ void font_elem_destroy() {
 }
 
 void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *descent) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
+    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     *baseline = (int16_t)rintl((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
     PangoFontMetrics *metrics =
@@ -211,7 +211,7 @@ void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *d
 // text split
 
 int16_t *font_split_text(int fontid, char *text, int edge) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
+    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
     pango_layout_set_width(layout, PANGO_SCALE * edge);
@@ -232,7 +232,7 @@ int16_t *font_split_text(int fontid, char *text, int edge) {
 // text rect
 
 void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(app));
+    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_text(layout, text, -1);
     int w, h;

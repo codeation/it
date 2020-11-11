@@ -7,6 +7,7 @@ typedef struct _window_elem window_elem;
 
 struct _window_elem {
     GtkWidget *draw;
+    int x, y;
     void *data;
 };
 
@@ -15,6 +16,8 @@ static id_list *window_list = NULL;
 void window_create(int id) {
     window_elem *w = malloc(sizeof(window_elem));
     w->draw = gtk_drawing_area_new();
+    w->x = 0;
+    w->y = 0;
     w->data = draw_data_new();
     g_signal_connect(G_OBJECT(w->draw), "draw", G_CALLBACK(draw_callback), w->data);
     gtk_container_add(GTK_CONTAINER(layout), w->draw);
@@ -38,8 +41,18 @@ void *window_get_data(int id) { return window_get(id)->data; }
 
 void window_size(int id, int x, int y, int width, int height) {
     window_elem *w = window_get(id);
+    w->x = x;
+    w->y = y;
     gtk_layout_move(GTK_LAYOUT(layout), w->draw, x, y);
     gtk_widget_set_size_request(w->draw, width, height);
+}
+
+void window_raise(int id) {
+    window_elem *w = window_get(id);
+    g_object_ref(w->draw);
+    gtk_container_remove(GTK_CONTAINER(layout), w->draw);
+    gtk_container_add(GTK_CONTAINER(layout), w->draw);
+    gtk_layout_move(GTK_LAYOUT(layout), w->draw, w->x, w->y);
 }
 
 void window_redraw(int id) { gtk_widget_queue_draw(window_get(id)->draw); }

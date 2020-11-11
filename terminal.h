@@ -9,8 +9,13 @@
 
 extern char *it_version;
 
-extern GtkWidget *app;
+extern GtkApplication *app;
+
+extern GtkWidget *top;
 extern GtkWidget *layout;
+
+extern GMenu *appmenu;
+extern GMenu *barmenu;
 
 // network
 
@@ -31,6 +36,7 @@ gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UN
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);
+void s_menu_action(char *action);
 
 // call
 
@@ -40,6 +46,7 @@ void callcommand(char command);
 
 void window_create(int id);
 void window_destroy(int id);
+void window_raise(int id);
 void *window_get_data(int id);
 
 void window_size(int id, int x, int y, int width, int height);
@@ -69,6 +76,11 @@ void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, in
 void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b);
 void elem_image_add(int id, int x, int y, int imageid);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b);
+
+// menu
+
+void menu_node_add(int id, int parent, char *label);
+void menu_item_add(int id, int parent, char *label, char *action);
 
 gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data);
 
