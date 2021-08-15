@@ -19,10 +19,12 @@ extern GMenu *barmenu;
 
 // network
 
-void network_init();
-void network_done();
-void socket_input_write(void *data, int length);
-void socket_output_write(void *data, int length);
+void pipe_init();
+void pipe_done();
+void pipe_output_write(void *data, int length);
+void pipe_output_flush();
+void pipe_event_write(void *data, int length);
+void pipe_event_flush();
 
 // io
 
@@ -33,6 +35,7 @@ gboolean readchan(GIOChannel *source, GIOCondition condition, gpointer data);
 // event
 
 gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED);
+gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data);
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);

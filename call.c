@@ -8,8 +8,9 @@
 
 static void commandVersion() {
     int16_t length = strlen(it_version);
-    socket_input_write(&length, sizeof length);
-    socket_input_write(it_version, length);
+    pipe_output_write(&length, sizeof length);
+    pipe_output_write(it_version, length);
+    pipe_output_flush();
 }
 
 // clear command
@@ -117,9 +118,10 @@ static void setFont(void *family) {
                   font.stretch);
     int16_t baseline, ascent, descent;
     get_font_metrics(font.id, &baseline, &ascent, &descent);
-    socket_input_write(&baseline, sizeof baseline);
-    socket_input_write(&ascent, sizeof ascent);
-    socket_input_write(&descent, sizeof descent);
+    pipe_output_write(&baseline, sizeof baseline);
+    pipe_output_write(&ascent, sizeof ascent);
+    pipe_output_write(&descent, sizeof descent);
+    pipe_output_flush();
 }
 
 static void commandFont() { readalloccall(&font, sizeof font, setFont); }
@@ -135,10 +137,12 @@ static void splitText(void *text) {
     int16_t *out = font_split_text(split.fontid, text, split.edge);
     if (out == NULL) {
         int16_t value = 0;
-        socket_input_write(&value, sizeof value);
+        pipe_output_write(&value, sizeof value);
+        pipe_output_flush();
     } else {
         int length = (1 + *out) * sizeof(int16_t);
-        socket_input_write(out, length);
+        pipe_output_write(out, length);
+        pipe_output_flush();
         free(out);
     }
 }
@@ -152,8 +156,9 @@ static struct { int16_t fontid; } textrect;
 static void rectText(void *text) {
     int16_t width, height;
     font_rect_text(textrect.fontid, text, &width, &height);
-    socket_input_write(&width, sizeof width);
-    socket_input_write(&height, sizeof width);
+    pipe_output_write(&width, sizeof width);
+    pipe_output_write(&height, sizeof width);
+    pipe_output_flush();
 }
 
 static void commandRect() { readalloccall(&textrect, sizeof textrect, rectText); }

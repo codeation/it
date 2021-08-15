@@ -1,5 +1,7 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 GtkApplication *app = NULL;
 
@@ -8,6 +10,8 @@ GtkWidget *layout = NULL;
 
 GMenu *appmenu = NULL;
 GMenu *barmenu = NULL;
+
+static char *pipe_suffix;
 
 static void on_app_activate(GApplication *application, gpointer data) {
     appmenu = g_menu_new();
@@ -23,21 +27,28 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_signal_connect(top, "button_press_event", G_CALLBACK(s_button), NULL);
     g_signal_connect(top, "button_release_event", G_CALLBACK(s_button), NULL);
     g_signal_connect(top, "motion_notify_event", G_CALLBACK(s_motion), NULL);
+    g_signal_connect(top, "configure-event", G_CALLBACK(on_configure), NULL);
 
     layout = gtk_layout_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(top), layout);
 
-    network_init();
+    pipe_init(pipe_suffix, readchan);
 }
 
-static void on_app_shutdown(GApplication *application, gpointer data) { network_done(); }
+static void on_app_shutdown(GApplication *application, gpointer data) { pipe_done(); }
 
 int main(int argc, char **argv) {
-    app = gtk_application_new("com.github.codeation.impress", G_APPLICATION_FLAGS_NONE);
+    if (argc != 2) {
+        printf("suffix parameter missing\n");
+        return 1;
+    }
+    pipe_suffix = argv[1];
+    app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
     g_set_application_name("Impress");
     g_signal_connect(app, "activate", G_CALLBACK(on_app_activate), NULL);
     g_signal_connect(app, "shutdown", G_CALLBACK(on_app_shutdown), NULL);
-    int status = g_application_run(G_APPLICATION(app), argc, argv);
+
+    int status = g_application_run(G_APPLICATION(app), 1, argv);
     g_object_unref(app);
     return status;
 }
