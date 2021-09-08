@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string.h>
 
+static int layoutOffsetX, layoutOffsetY;
+
 // General events
 
 typedef struct {
@@ -28,6 +30,7 @@ typedef struct {
 
 gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
     char command_type = 'f';
+    gtk_widget_translate_coordinates(layout, gtk_widget_get_toplevel(layout), 0, 0, &layoutOffsetX, &layoutOffsetY);
     int width, height;
     gtk_window_get_size(window, &width, &height);
     configure_event e;
@@ -80,8 +83,8 @@ gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     button_event e;
     e.type = event->type;
     e.button = event->button;
-    e.x = (int16_t)rintl(event->x);
-    e.y = (int16_t)rintl(event->y);
+    e.x = (int16_t)(rintl(event->x) - layoutOffsetX);
+    e.y = (int16_t)(rintl(event->y) - layoutOffsetY);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -99,8 +102,8 @@ typedef struct {
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     char command_type = 'm';
     motion_event e;
-    e.x = (int16_t)rintl(event->x);
-    e.y = (int16_t)rintl(event->y);
+    e.x = (int16_t)(rintl(event->x) - layoutOffsetX);
+    e.y = (int16_t)(rintl(event->y) - layoutOffsetY);
     e.shift = event->state & GDK_SHIFT_MASK ? 1 : 0;
     e.control = event->state & GDK_CONTROL_MASK ? 1 : 0;
     e.alt = event->state & GDK_MOD1_MASK ? 1 : 0;
