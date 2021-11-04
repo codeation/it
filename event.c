@@ -30,7 +30,8 @@ typedef struct {
 
 gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
     char command_type = 'f';
-    gtk_widget_translate_coordinates(layout, gtk_widget_get_toplevel(layout), 0, 0, &layoutOffsetX, &layoutOffsetY);
+    gtk_widget_translate_coordinates(layout, gtk_widget_get_toplevel(layout), 0, 0, &layoutOffsetX,
+                                     &layoutOffsetY);
     int width, height;
     gtk_window_get_size(window, &width, &height);
     configure_event e;
