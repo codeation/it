@@ -23,7 +23,12 @@ static void commandClear() { readbuffcall(&windowid, sizeof windowid, setClear);
 
 // show command
 
-static void setShow() { window_redraw(windowid.id); }
+static void setShow() {
+    int16_t zero = 0;
+    pipe_output_write(&zero, sizeof zero);
+    pipe_output_flush();
+    window_redraw(windowid.id);
+}
 
 static void commandShow() { readbuffcall(&windowid, sizeof windowid, setShow); }
 
