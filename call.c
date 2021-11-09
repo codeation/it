@@ -37,7 +37,7 @@ static void commandShow() { readbuffcall(&windowid, sizeof windowid, setShow); }
 static struct {
     int16_t id;
     int16_t x, y, width, height;
-    int16_t r, g, b;
+    uint16_t r, g, b;
 } fill;
 
 static void setFill() {
@@ -52,7 +52,7 @@ static struct {
     int16_t id;
     int16_t x0, y0;
     int16_t x1, y1;
-    int16_t r, g, b;
+    uint16_t r, g, b;
 } line;
 
 static void setLine() {
@@ -66,7 +66,7 @@ static void commandLine() { readbuffcall(&line, sizeof line, setLine); }
 static struct {
     int16_t id;
     int16_t x, y;
-    int16_t r, g, b;
+    uint16_t r, g, b;
     int16_t fontid;
     int16_t fontsize;
 } point;
@@ -198,7 +198,7 @@ static struct {
     int16_t id;
     int16_t x, y;
     int16_t width, height;
-    int16_t r, g, b;
+    uint16_t r, g, b;
 } window;
 
 static void setWindow() {

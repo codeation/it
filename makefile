@@ -1,9 +1,6 @@
 CFLAGS=$(shell pkg-config --cflags gtk+-3.0)
 LDFLAGS=$(shell pkg-config --libs gtk+-3.0)
 
-#CFLAGS=$(shell pkg-config --cflags gtk4)
-#LDFLAGS=$(shell pkg-config --libs gtk4)
-
 it: call.o draw.o event.o idlist.o io.o main.o menu.o pipe.o version.o window.o
 	gcc -o it $(LDFLAGS) -lm call.o draw.o event.o idlist.o io.o main.o menu.o pipe.o version.o window.o
 

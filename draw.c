@@ -50,9 +50,9 @@ void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, in
     e->y = y;
     e->width = width;
     e->height = height;
-    e->r = (double)r / 255.0;
-    e->g = (double)g / 255.0;
-    e->b = (double)b / 255.0;
+    e->r = (double)r / (double)0xFFFF;
+    e->g = (double)g / (double)0xFFFF;
+    e->b = (double)b / (double)0xFFFF;
     draw_elem_add(window_get_data(id), e);
 }
 
@@ -83,9 +83,9 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b) 
     e->y0 = y0;
     e->x1 = x1;
     e->y1 = y1;
-    e->r = (double)r / 255.0;
-    e->g = (double)g / 255.0;
-    e->b = (double)b / 255.0;
+    e->r = (double)r / (double)0xFFFF;
+    e->g = (double)g / (double)0xFFFF;
+    e->b = (double)b / (double)0xFFFF;
     draw_elem_add(window_get_data(id), e);
 }
 
@@ -280,9 +280,9 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->y = y;
     e->text = text;
     e->fontid = fontid;
-    e->r = (double)r / 255.0;
-    e->g = (double)g / 255.0;
-    e->b = (double)b / 255.0;
+    e->r = (double)r / (double)0xFFFF;
+    e->g = (double)g / (double)0xFFFF;
+    e->b = (double)b / (double)0xFFFF;
     e->layout = NULL;
     draw_elem_add(window_get_data(id), e);
 }

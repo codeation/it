@@ -1,14 +1,14 @@
 # it
 Impress terminal application, part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
-## Proof of Concept Version
+## Alpha Version
 
 Notes:
 
-- This project is still in the early stages of development and is not yet in a usable state.
-- The project tested on Ubuntu 21.04 and MacOS Big Sur (11.5)
+- The project tested on Debian 11.1 and macOS Big Sur (11.5)
+- The library may contain bugs
 
-## Installation (Linux)
+## Building (Linux)
 
 Currently, the application uses [GTK+ 3](https://www.gtk.org)
 for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
@@ -21,13 +21,13 @@ sudo apt-get install libgtk-3-dev
 
 Also [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) must be installed.
 
-To build binary, download the sources and use the following command:
+To build binary, download the sources and use the following command in project directory:
 
 ```
 make
 ```
 
-## Installation (macOS)
+## Building (macOS)
 
 First install [Homebrew](https://brew.sh/) if you don't have installed.
 
@@ -37,7 +37,7 @@ To install [GTK+ 3](https://www.gtk.org) run:
 brew install gtk+3
 ```
 
-To build binary, download the sources and use the following command:
+To build binary, download the sources and use the following command in project directory:
 
 ```
 make
@@ -47,3 +47,7 @@ make
 
 You can download the compiled binary file on the ["releases"](https://github.com/codeation/it/releases) page.
 Please, check and verify the sha256 sum for downloaded files.
+
+## Issues
+
+Feel free to open [issue](https://github.com/codeation/impress/issues)
