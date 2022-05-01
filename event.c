@@ -26,6 +26,7 @@ gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UN
 
 typedef struct {
     uint16_t width, height;
+    uint16_t inner_width, inner_height;
 } configure_event;
 
 gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
@@ -37,6 +38,8 @@ gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
     configure_event e;
     e.width = width;
     e.height = height;
+    e.inner_width = width - layoutOffsetX;
+    e.inner_height = height - layoutOffsetY;
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
