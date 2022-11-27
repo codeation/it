@@ -95,6 +95,7 @@ typedef struct _image_elem image_elem;
 
 struct _image_elem {
     unsigned char *data;
+    int width, height;
     cairo_surface_t *image;
 };
 
@@ -115,6 +116,8 @@ void image_add(int id, int width, int height, unsigned char *data) {
     }
     image_elem *e = malloc(sizeof(image_elem));
     e->data = data;
+    e->width = width;
+    e->height = height;
     e->image =
         cairo_image_surface_create_for_data(e->data, CAIRO_FORMAT_ARGB32, width, height, stride);
     if (image_list == NULL)
@@ -134,12 +137,16 @@ void image_rem(int id) {
 typedef struct {
     int type;
     int x, y;
+    int width, height;
     int imageid;
 } elem_image;
 
 void elem_image_draw(cairo_t *cr, elem_image *e) {
     cairo_save(cr);
     image_elem *ie = get_image(e->imageid);
+    double scale_x = (double)(ie->width) / (double)(e->width);
+    double scale_y = (double)(ie->height) / (double)(e->height);
+    cairo_surface_set_device_scale(ie->image, scale_x, scale_y);
     cairo_set_source_surface(cr, ie->image, e->x, e->y);
     cairo_paint(cr);
     cairo_restore(cr);
@@ -147,11 +154,13 @@ void elem_image_draw(cairo_t *cr, elem_image *e) {
 
 void elem_image_destroy(elem_image *e) {}
 
-void elem_image_add(int id, int x, int y, int imageid) {
+void elem_image_add(int id, int x, int y, int width, int height, int imageid) {
     elem_image *e = malloc(sizeof(elem_image));
     e->type = DRAW_ELEM_IMAGE;
     e->x = x;
     e->y = y;
+    e->width = width;
+    e->height = height;
     e->imageid = imageid;
     draw_elem_add(window_get_data(id), e);
 }

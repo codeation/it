@@ -82,10 +82,13 @@ void commandText() { readalloccall(&point, sizeof point, setText); }
 static struct {
     int16_t id;
     int16_t x, y;
+    int16_t width, height;
     int16_t imageid;
 } image;
 
-static void setImage() { elem_image_add(image.id, image.x, image.y, image.imageid); }
+static void setImage() {
+    elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid);
+}
 
 static void commandImage() { readbuffcall(&image, sizeof image, setImage); }
 

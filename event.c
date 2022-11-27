@@ -43,7 +43,7 @@ gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return FALSE;
+    return TRUE;
 }
 
 // Keyboard events
@@ -92,7 +92,7 @@ gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return FALSE;
+    return TRUE;
 }
 
 typedef struct {
@@ -115,7 +115,24 @@ gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return FALSE;
+    return TRUE;
+}
+
+typedef struct {
+    uint16_t direction;
+    uint16_t delta_x, delta_y;
+} scroll_event;
+
+gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
+    char command_type = 's';
+    scroll_event e;
+    e.direction = event->direction;
+    e.delta_x = event->delta_x;
+    e.delta_y = event->delta_y;
+    pipe_event_write(&command_type, sizeof command_type);
+    pipe_event_write(&e, sizeof e);
+    pipe_event_flush();
+    return TRUE;
 }
 
 // Menu events
