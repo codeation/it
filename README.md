@@ -5,7 +5,7 @@ Impress terminal application, part of cross-platform GUI Library for Go. See htt
 
 Notes:
 
-- The project tested on Debian 11.1 and macOS Big Sur (11.5)
+- The project tested on Debian 11.6 and macOS Big Sur (11.5)
 - The library may contain bugs
 
 ## Building (Linux)

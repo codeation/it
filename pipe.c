@@ -1,3 +1,4 @@
+#include "terminal.h"
 #include <fcntl.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
@@ -5,10 +6,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define FIFO_STREAM_PATH "/tmp/it_fifo_stream_"
 #define FIFO_INPUT_PATH "/tmp/it_fifo_input_"
 #define FIFO_OUTPUT_PATH "/tmp/it_fifo_output_"
 #define FIFO_EVENT_PATH "/tmp/it_fifo_event_"
 
+static FILE *handle_stream = NULL;
 static FILE *handle_input = NULL;
 static FILE *handle_output = NULL;
 static FILE *handle_event = NULL;
@@ -29,13 +32,17 @@ void pipe_init(char *pipe_suffix, GIOFunc func) {
     handle_output = pipe_open(FIFO_OUTPUT_PATH, pipe_suffix, "w");
     handle_event = pipe_open(FIFO_EVENT_PATH, pipe_suffix, "w");
     handle_input = pipe_open(FIFO_INPUT_PATH, pipe_suffix, "r");
-    GIOChannel *chan = g_io_channel_unix_new(fileno(handle_input));
-    g_io_add_watch(chan, G_IO_IN, func, NULL);
+    handle_stream = pipe_open(FIFO_STREAM_PATH, pipe_suffix, "r");
+    g_io_add_watch(g_io_channel_unix_new(fileno(handle_input)), G_IO_IN, func, io_input());
+    g_io_add_watch(g_io_channel_unix_new(fileno(handle_stream)), G_IO_IN, func, io_stream());
 }
 
 void pipe_done() {
     if (fclose(handle_input) != 0) {
         perror("pipe close failed (i)");
+    }
+    if (fclose(handle_stream) != 0) {
+        perror("pipe close failed (s)");
     }
     if (fclose(handle_output) != 0) {
         perror("pipe close failed (o)");

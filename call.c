@@ -19,18 +19,17 @@ static struct { int16_t id; } windowid;
 
 static void setClear() { elem_clear(windowid.id); }
 
-static void commandClear() { readbuffcall(&windowid, sizeof windowid, setClear); }
+static void commandClear(pipe_buffer *target) {
+    parameters_to_call(target, &windowid, sizeof windowid, setClear);
+}
 
 // show command
 
-static void setShow() {
-    int16_t zero = 0;
-    pipe_output_write(&zero, sizeof zero);
-    pipe_output_flush();
-    window_redraw(windowid.id);
-}
+static void setShow() { window_redraw(windowid.id); }
 
-static void commandShow() { readbuffcall(&windowid, sizeof windowid, setShow); }
+static void commandShow(pipe_buffer *target) {
+    parameters_to_call(target, &windowid, sizeof windowid, setShow);
+}
 
 // fill command
 
@@ -44,7 +43,9 @@ static void setFill() {
     elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b);
 }
 
-static void commandFill() { readbuffcall(&fill, sizeof fill, setFill); }
+static void commandFill(pipe_buffer *target) {
+    parameters_to_call(target, &fill, sizeof fill, setFill);
+}
 
 // draw line
 
@@ -59,7 +60,9 @@ static void setLine() {
     elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b);
 }
 
-static void commandLine() { readbuffcall(&line, sizeof line, setLine); }
+static void commandLine(pipe_buffer *target) {
+    parameters_to_call(target, &line, sizeof line, setLine);
+}
 
 // draw string
 
@@ -73,9 +76,12 @@ static struct {
 
 static void setText(void *text) {
     elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b);
+    // free(text) in elem_text_destroy
 }
 
-void commandText() { readalloccall(&point, sizeof point, setText); }
+void commandText(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &point, sizeof point, setText);
+}
 
 // draw image
 
@@ -90,7 +96,9 @@ static void setImage() {
     elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid);
 }
 
-static void commandImage() { readbuffcall(&image, sizeof image, setImage); }
+static void commandImage(pipe_buffer *target) {
+    parameters_to_call(target, &image, sizeof image, setImage);
+}
 
 // load image
 
@@ -101,9 +109,12 @@ static struct {
 
 static void setImageAdd(void *data) {
     image_add(imageAdd.id, imageAdd.width, imageAdd.height, data);
+    // free(data) in image_rem
 }
 
-static void commandImageAdd() { readalloccall(&imageAdd, sizeof imageAdd, setImageAdd); }
+static void commandImageAdd(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &imageAdd, sizeof imageAdd, setImageAdd);
+}
 
 // remove image
 
@@ -111,7 +122,9 @@ static struct { int16_t id; } imageid;
 
 static void setImageRem() { image_rem(imageid.id); }
 
-static void commandImageRem() { readbuffcall(&imageid, sizeof imageid, setImageRem); }
+static void commandImageRem(pipe_buffer *target) {
+    parameters_to_call(target, &imageid, sizeof imageid, setImageRem);
+}
 
 // load font
 
@@ -130,9 +143,12 @@ static void setFont(void *family) {
     pipe_output_write(&ascent, sizeof ascent);
     pipe_output_write(&descent, sizeof descent);
     pipe_output_flush();
+    free(family);
 }
 
-static void commandFont() { readalloccall(&font, sizeof font, setFont); }
+static void commandFont(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &font, sizeof font, setFont);
+}
 
 // split text
 
@@ -153,9 +169,12 @@ static void splitText(void *text) {
         pipe_output_flush();
         free(out);
     }
+    free(text);
 }
 
-static void commandSplit() { readalloccall(&split, sizeof split, splitText); }
+static void commandSplit(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &split, sizeof split, splitText);
+}
 
 // text rect
 
@@ -167,9 +186,12 @@ static void rectText(void *text) {
     pipe_output_write(&width, sizeof width);
     pipe_output_write(&height, sizeof width);
     pipe_output_flush();
+    free(text);
 }
 
-static void commandRect() { readalloccall(&textrect, sizeof textrect, rectText); }
+static void commandRect(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &textrect, sizeof textrect, rectText);
+}
 
 // app window size
 
@@ -184,16 +206,20 @@ static void setSize() {
     gtk_widget_show_all(top);
 }
 
-static void commandSize() { readbuffcall(&size, sizeof size, setSize); }
+static void commandSize(pipe_buffer *target) {
+    parameters_to_call(target, &size, sizeof size, setSize);
+}
 
 // app window title
 
-static void setTitle(void *buff) {
-    gtk_window_set_title(GTK_WINDOW(top), buff);
-    free(buff);
+static void setTitle(void *title) {
+    gtk_window_set_title(GTK_WINDOW(top), title);
+    free(title);
 }
 
-static void commandTitle() { readalloccall(NULL, 0, setTitle); }
+static void commandTitle(pipe_buffer *target) {
+    parameters_alloc_to_call(target, NULL, 0, setTitle);
+}
 
 // window
 
@@ -209,7 +235,9 @@ static void setWindow() {
     window_size(window.id, window.x, window.y, window.width, window.height);
 }
 
-static void commandWindow() { readbuffcall(&window, sizeof window, setWindow); }
+static void commandWindow(pipe_buffer *target) {
+    parameters_to_call(target, &window, sizeof window, setWindow);
+}
 
 // window size
 
@@ -217,19 +245,25 @@ static void setWindowSize() {
     window_size(window.id, window.x, window.y, window.width, window.height);
 }
 
-static void commandWindowSize() { readbuffcall(&window, sizeof window, setWindowSize); }
+static void commandWindowSize(pipe_buffer *target) {
+    parameters_to_call(target, &window, sizeof window, setWindowSize);
+}
 
 // drop window command
 
 static void dropWindow() { window_destroy(windowid.id); }
 
-static void commandWindowDrop() { readbuffcall(&windowid, sizeof windowid, dropWindow); }
+static void commandWindowDrop(pipe_buffer *target) {
+    parameters_to_call(target, &windowid, sizeof windowid, dropWindow);
+}
 
 // window raise
 
 static void raiseWindow() { window_raise(windowid.id); }
 
-static void commandWindowRaise() { readbuffcall(&windowid, sizeof windowid, raiseWindow); }
+static void commandWindowRaise(pipe_buffer *target) {
+    parameters_to_call(target, &windowid, sizeof windowid, raiseWindow);
+}
 
 // menu node
 
@@ -238,102 +272,113 @@ static struct {
     int16_t parent;
 } menu;
 
-static void addMenu(void *label) { menu_node_add(menu.id, menu.parent, label); }
+static void addMenu(void *label) {
+    menu_node_add(menu.id, menu.parent, label);
+    // free(label) is eternal
+}
 
-static void commandMenu() { readalloccall(&menu, sizeof menu, addMenu); }
+static void commandMenu(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &menu, sizeof menu, addMenu);
+}
 
 // menu item
 
 static char *menuItemLabel = NULL;
+static pipe_buffer *menu_target = NULL;
 
 static void addMenuItem(void *action) {
     menu_item_add(menu.id, menu.parent, menuItemLabel, action);
+    // free(action) is eternal
+    // free(menuItemLabel) is eternal
 }
 
 static void setMenuItem(void *label) {
     menuItemLabel = label;
-    readalloccall(NULL, 0, addMenuItem);
+    parameters_alloc_to_call(menu_target, NULL, 0, addMenuItem);
 }
 
-static void commandMenuItem() { readalloccall(&menu, sizeof menu, setMenuItem); }
+static void commandMenuItem(pipe_buffer *target) {
+    menu_target = target;
+    parameters_alloc_to_call(target, &menu, sizeof menu, setMenuItem);
+}
 
 // dispatch
 
-void callcommand(char command) {
+void callcommand(char command, pipe_buffer *target) {
     switch (command) {
     // application
     case 'S':
-        commandSize();
+        commandSize(target);
         break;
     case 'T':
-        commandTitle();
+        commandTitle(target);
         break;
     case 'X':
         g_application_quit(G_APPLICATION(app));
         break;
     case 'V':
-        commandVersion();
+        commandVersion(target);
         break;
 
     // window
     case 'D':
-        commandWindow();
+        commandWindow(target);
         break;
     case 'Z':
-        commandWindowSize();
+        commandWindowSize(target);
         break;
     case 'O':
-        commandWindowDrop();
+        commandWindowDrop(target);
         break;
     case 'A':
-        commandWindowRaise();
+        commandWindowRaise(target);
         break;
 
     // draw
     case 'W':
-        commandShow();
+        commandShow(target);
         break;
     case 'C':
-        commandClear();
+        commandClear(target);
         break;
     case 'F':
-        commandFill();
+        commandFill(target);
         break;
     case 'L':
-        commandLine();
+        commandLine(target);
         break;
     case 'U':
-        commandText();
+        commandText(target);
         break;
     case 'I':
-        commandImage();
+        commandImage(target);
         break;
 
     // image
     case 'B':
-        commandImageAdd();
+        commandImageAdd(target);
         break;
     case 'M':
-        commandImageRem();
+        commandImageRem(target);
         break;
 
     // font
     case 'N':
-        commandFont();
+        commandFont(target);
         break;
     case 'P':
-        commandSplit();
+        commandSplit(target);
         break;
     case 'R':
-        commandRect();
+        commandRect(target);
         break;
 
     // menu
     case 'E':
-        commandMenu();
+        commandMenu(target);
         break;
     case 'G':
-        commandMenuItem();
+        commandMenuItem(target);
         break;
     }
 }

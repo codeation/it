@@ -33,7 +33,7 @@ static void on_app_activate(GApplication *application, gpointer data) {
     layout = gtk_layout_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(top), layout);
 
-    pipe_init(pipe_suffix, readchan);
+    pipe_init(pipe_suffix, async_read_chan);
 }
 
 static void on_app_shutdown(GApplication *application, gpointer data) { pipe_done(); }

@@ -28,9 +28,12 @@ void pipe_event_flush();
 
 // io
 
-void readbuffcall(void *buffer, int size, void (*f)());
-void readalloccall(void *buffer, int size, void (*f)(void *));
-gboolean readchan(GIOChannel *source, GIOCondition condition, gpointer data);
+typedef struct pipe_buffer pipe_buffer;
+pipe_buffer *io_input();
+pipe_buffer *io_stream();
+void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)());
+void parameters_alloc_to_call(pipe_buffer *target, void *buffer, int size, void (*f)(void *));
+gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data);
 
 // event
 
@@ -44,7 +47,7 @@ void s_menu_action(char *action);
 
 // call
 
-void callcommand(char command);
+void callcommand(char command, pipe_buffer *target);
 
 // window
 

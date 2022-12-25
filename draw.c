@@ -192,7 +192,6 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     if (font_list == NULL)
         font_list = id_list_new();
     id_list_append(font_list, id, e);
-    free(family);
 }
 
 void font_elem_destroy() {
@@ -234,7 +233,6 @@ int16_t *font_split_text(int fontid, char *text, int edge) {
         *pos++ = (int16_t)(line->length);
     }
     g_object_unref(layout);
-    free(text);
     return out;
 }
 
@@ -249,7 +247,6 @@ void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
     *width = (int16_t)w;
     *height = (int16_t)h;
     g_object_unref(layout);
-    free(text);
 }
 
 // text
