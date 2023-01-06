@@ -8,6 +8,30 @@ Notes:
 - The project tested on Debian 11.6 and macOS Big Sur (11.5)
 - The library may contain bugs
 
+## Building (Linux + docker)
+
+To build binary, download the sources:
+
+```
+git clone https://github.com/codeation/it.git
+cd it
+```
+
+and use the following command in project directory:
+
+```
+./build.sh
+```
+
+This command creates a container with libgtk-3-dev packages from the gcc compiler container. The build is done inside the docker container without installing additional packages on the host.
+
+Once the build is complete, the docker images can be removed using the `docker image rm` command:
+
+```
+amd64/gcc or arm64v8/gcc
+it-build/gcc
+```
+
 ## Building (Linux)
 
 Currently, the application uses [GTK+ 3](https://www.gtk.org)
@@ -21,7 +45,14 @@ sudo apt-get install libgtk-3-dev
 
 Also [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) must be installed.
 
-To build binary, download the sources and use the following command in project directory:
+To build binary, download the sources:
+
+```
+git clone https://github.com/codeation/it.git
+cd it
+```
+
+and use the following command in project directory:
 
 ```
 make
@@ -37,7 +68,14 @@ To install [GTK+ 3](https://www.gtk.org) run:
 brew install gtk+3
 ```
 
-To build binary, download the sources and use the following command in project directory:
+To build binary, download the sources:
+
+```
+git clone https://github.com/codeation/it.git
+cd it
+```
+
+and use the following command in project directory:
 
 ```
 make
@@ -45,7 +83,7 @@ make
 
 ## Download
 
-You can download the compiled binary file on the ["releases"](https://github.com/codeation/it/releases) page.
+You can download the compiled binary `it` file on the ["releases"](https://github.com/codeation/it/releases) page.
 Please, check and verify the sha256 sum for downloaded files.
 
 ## Issues
