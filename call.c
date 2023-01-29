@@ -203,7 +203,7 @@ static struct {
 static void setSize() {
     gtk_window_move(GTK_WINDOW(top), size.x, size.y);
     gtk_window_resize(GTK_WINDOW(top), size.width, size.height);
-    gtk_widget_show_all(top);
+    // gtk_widget_show(top);
 }
 
 static void commandSize(pipe_buffer *target) {
@@ -221,17 +221,69 @@ static void commandTitle(pipe_buffer *target) {
     parameters_alloc_to_call(target, NULL, 0, setTitle);
 }
 
-// window
+// layout
+
+static struct {
+    int16_t id;
+    int16_t parent_id;
+    int16_t x, y;
+    int16_t width, height;
+} layout;
+
+static void setLayout() {
+    layout_create(layout.id, layout.parent_id);
+    layout_size(layout.id, layout.x, layout.y, layout.width, layout.height);
+}
+
+static void commandLayout(pipe_buffer *target) {
+    parameters_to_call(target, &layout, sizeof layout, setLayout);
+}
+
+// layout drop
+
+static struct { int16_t id; } layoutid;
+
+static void dropLayout() { layout_destroy(layoutid.id); }
+
+static void commandLayoutDrop(pipe_buffer *target) {
+    parameters_to_call(target, &layoutid, sizeof layoutid, dropLayout);
+}
+
+// layout size
 
 static struct {
     int16_t id;
     int16_t x, y;
     int16_t width, height;
-    uint16_t r, g, b;
+} layoutSize;
+
+static void sizeLayout() {
+    layout_size(layoutSize.id, layoutSize.x, layoutSize.y, layoutSize.width, layoutSize.height);
+}
+
+static void commandLayoutSize(pipe_buffer *target) {
+    parameters_to_call(target, &layoutSize, sizeof layoutSize, sizeLayout);
+}
+
+// layout raise
+
+static void raiseLayout() { layout_raise(layoutid.id); }
+
+static void commandLayoutRaise(pipe_buffer *target) {
+    parameters_to_call(target, &layoutid, sizeof layoutid, raiseLayout);
+}
+
+// window
+
+static struct {
+    int16_t id;
+    int16_t layout_id;
+    int16_t x, y;
+    int16_t width, height;
 } window;
 
 static void setWindow() {
-    window_create(window.id);
+    window_create(window.id, window.layout_id);
     window_size(window.id, window.x, window.y, window.width, window.height);
 }
 
@@ -241,12 +293,18 @@ static void commandWindow(pipe_buffer *target) {
 
 // window size
 
+static struct {
+    int16_t id;
+    int16_t x, y;
+    int16_t width, height;
+} windowSize;
+
 static void setWindowSize() {
-    window_size(window.id, window.x, window.y, window.width, window.height);
+    window_size(windowSize.id, windowSize.x, windowSize.y, windowSize.width, windowSize.height);
 }
 
 static void commandWindowSize(pipe_buffer *target) {
-    parameters_to_call(target, &window, sizeof window, setWindowSize);
+    parameters_to_call(target, &windowSize, sizeof windowSize, setWindowSize);
 }
 
 // drop window command
@@ -318,6 +376,20 @@ void callcommand(char command, pipe_buffer *target) {
         break;
     case 'V':
         commandVersion(target);
+        break;
+
+    // layout
+    case 'Y':
+        commandLayout(target);
+        break;
+    case 'Q':
+        commandLayoutDrop(target);
+        break;
+    case 'H':
+        commandLayoutSize(target);
+        break;
+    case 'J':
+        commandLayoutRaise(target);
         break;
 
     // window

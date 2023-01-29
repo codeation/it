@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-static int layoutOffsetX, layoutOffsetY;
+static int layoutOffsetX = 0, layoutOffsetY = 0;
 
 // General events
 
@@ -29,17 +29,18 @@ typedef struct {
     uint16_t inner_width, inner_height;
 } configure_event;
 
-gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data) {
+gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer G_GNUC_UNUSED) {
+    static GtkWidget *layout;
+    if (layout == NULL) {
+        layout = layout_get_widget(1);
+    }
+    gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
     char command_type = 'f';
-    gtk_widget_translate_coordinates(layout, gtk_widget_get_toplevel(layout), 0, 0, &layoutOffsetX,
-                                     &layoutOffsetY);
-    int width, height;
-    gtk_window_get_size(window, &width, &height);
     configure_event e;
-    e.width = width;
-    e.height = height;
-    e.inner_width = width - layoutOffsetX;
-    e.inner_height = height - layoutOffsetY;
+    e.width = event->width;
+    e.height = event->height;
+    e.inner_width = event->width - layoutOffsetX;
+    e.inner_height = event->height - layoutOffsetY;
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();

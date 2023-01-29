@@ -10,9 +10,7 @@
 extern char *it_version;
 
 extern GtkApplication *app;
-
 extern GtkWidget *top;
-extern GtkWidget *layout;
 
 extern GMenu *appmenu;
 extern GMenu *barmenu;
@@ -38,7 +36,7 @@ gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer da
 // event
 
 gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED);
-gboolean on_configure(GtkWindow *window, GdkEvent *event, gpointer data);
+gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer G_GNUC_UNUSED);
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);
@@ -49,15 +47,24 @@ void s_menu_action(char *action);
 
 void callcommand(char command, pipe_buffer *target);
 
+// layout
+
+void layout_create(int id, int parent_id);
+void layout_destroy(int id);
+void layout_raise(int id);
+void layout_size(int id, int x, int y, int width, int height);
+
+GtkWidget *layout_get_widget(int id);
+
 // window
 
-void window_create(int id);
+void window_create(int id, int layout_id);
 void window_destroy(int id);
 void window_raise(int id);
-void *window_get_data(int id);
-
 void window_size(int id, int x, int y, int width, int height);
 void window_redraw(int id);
+
+void *window_get_data(int id);
 
 // image
 
