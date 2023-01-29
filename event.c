@@ -14,7 +14,7 @@ typedef struct {
 
 #define GENERAL_EVENT_DESTROY 1
 
-gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED) {
+gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED) {
     char command_type = 'g';
     general_event e;
     e.id = GENERAL_EVENT_DESTROY;
@@ -29,7 +29,7 @@ typedef struct {
     uint16_t inner_width, inner_height;
 } configure_event;
 
-gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer G_GNUC_UNUSED) {
+gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
     static GtkWidget *layout;
     if (layout == NULL) {
         layout = layout_get_widget(1);
