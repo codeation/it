@@ -1,20 +1,18 @@
 name: build release
 run-name: ${{ github.actor }} runs a release build
 on:
-  create
+  push:
+    tags:
+      - 'v*'
+
 jobs:
-  it-build:
-    runs-on: ubuntu-20.04
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v3
-      - name: Print gcc version
-        run: gcc --version
-      - name: Install GTK 3
-        run: sudo apt-get install libgtk-3-dev
-      - name: Make all
-        run: make
-      - name: Archive it-linux.zip
-        run: zip it-linux.zip it
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -25,13 +23,39 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+
+  it_build:
+    needs: create_release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-latest]
+        include:
+          - os: ubuntu-20.04
+            target: linux
+          - os: macos-latest
+            target: darwin
+    steps:
+      - uses: actions/checkout@v3
+      - name: Print gcc version
+        run: gcc --version
+      - name: Install GTK 3 (apt-get)
+        if: ${{ matrix.target == 'linux' }}
+        run: sudo apt-get install libgtk-3-dev
+      - name: Install GTK 3 (brew)
+        if: ${{ matrix.target == 'darwin' }}
+        run: brew install gtk+3
+      - name: Make all
+        run: make
+      - name: Archive it-${{ matrix.target }}.zip
+        run: zip it-${{ matrix.target }}.zip it
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: it-linux.zip
-          asset_name: it-linux.zip
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: it-${{ matrix.target }}.zip
+          asset_name: it-${{ matrix.target }}.zip
           asset_content_type: application/zip

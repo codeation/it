@@ -62,6 +62,12 @@ To install [GTK+ 3](https://www.gtk.org) run:
 brew install gtk+3
 ```
 
+To install `pkg-config` run:
+
+```
+brew install pkg-config
+```
+
 To build binary, download the sources:
 
 ```
