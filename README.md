@@ -1,12 +1,6 @@
-# it
-Impress terminal application, part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
+# impress terminal application
 
-## Alpha Version
-
-Notes:
-
-- The project tested on Debian 11.6 and macOS Big Sur (11.5)
-- The library may contain bugs
+This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
 ## Building (Linux + docker)
 
@@ -25,7 +19,7 @@ and use the following command in project directory:
 
 This command creates a container with libgtk-3-dev packages from the gcc compiler container. The build is done inside the docker container without installing additional packages on the host.
 
-Once the build is complete, the docker images can be removed using the `docker image rm` command:
+Once the build is complete, the docker images can be removed using the `docker image rm` command. You can remove containers named:
 
 ```
 amd64/gcc or arm64v8/gcc
@@ -84,7 +78,12 @@ make
 ## Download
 
 You can download the compiled binary `it` file on the ["releases"](https://github.com/codeation/it/releases) page.
-Please, check and verify the sha256 sum for downloaded files.
+
+Github Actions builds binaries since v0.2.4 to prevent any corruption. Make sure the release is built from a signed commit.
+
+Please, check and verify the sha256 sum for downloaded files from previous releases.
+
+The `codeation` GPG key (Id `A8109B6877BC845E`) is used to sign commits in the main branch.
 
 ## Issues
 
