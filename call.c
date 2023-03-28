@@ -17,6 +17,8 @@ static void commandVersion() {
 
 static struct { int16_t id; } windowid;
 
+_Static_assert(sizeof windowid == 2, "wrong windowid align");
+
 static void setClear() { elem_clear(windowid.id); }
 
 static void commandClear(pipe_buffer *target) {
@@ -39,6 +41,8 @@ static struct {
     uint16_t r, g, b;
 } fill;
 
+_Static_assert(sizeof fill == 16, "wrong fill align");
+
 static void setFill() {
     elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b);
 }
@@ -55,6 +59,8 @@ static struct {
     int16_t x1, y1;
     uint16_t r, g, b;
 } line;
+
+_Static_assert(sizeof line == 16, "wrong line align");
 
 static void setLine() {
     elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b);
@@ -74,6 +80,8 @@ static struct {
     int16_t fontsize;
 } point;
 
+_Static_assert(sizeof point == 16, "wrong point align");
+
 static void setText(void *text) {
     elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b);
     // free(text) in elem_text_destroy
@@ -92,6 +100,8 @@ static struct {
     int16_t imageid;
 } image;
 
+_Static_assert(sizeof image == 12, "wrong image align");
+
 static void setImage() {
     elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid);
 }
@@ -107,6 +117,8 @@ static struct {
     int16_t width, height;
 } imageAdd;
 
+_Static_assert(sizeof imageAdd == 6, "wrong imageAdd align");
+
 static void setImageAdd(void *data) {
     image_add(imageAdd.id, imageAdd.width, imageAdd.height, data);
     // free(data) in image_rem
@@ -119,6 +131,8 @@ static void commandImageAdd(pipe_buffer *target) {
 // remove image
 
 static struct { int16_t id; } imageid;
+
+_Static_assert(sizeof imageid == 2, "wrong imageid align");
 
 static void setImageRem() { image_rem(imageid.id); }
 
@@ -133,6 +147,8 @@ static struct {
     int16_t height;
     int16_t style, variant, weight, stretch;
 } font;
+
+_Static_assert(sizeof font == 12, "wrong font align");
 
 static void setFont(void *family) {
     font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight,
@@ -156,6 +172,8 @@ static struct {
     int16_t fontid;
     int16_t edge;
 } split;
+
+_Static_assert(sizeof split == 4, "wrong split align");
 
 static void splitText(void *text) {
     int16_t *out = font_split_text(split.fontid, text, split.edge);
@@ -189,6 +207,8 @@ static void rectText(void *text) {
     free(text);
 }
 
+_Static_assert(sizeof textrect == 2, "wrong textrect align");
+
 static void commandRect(pipe_buffer *target) {
     parameters_alloc_to_call(target, &textrect, sizeof textrect, rectText);
 }
@@ -199,6 +219,8 @@ static struct {
     int16_t x, y;
     int16_t width, height;
 } size;
+
+_Static_assert(sizeof size == 8, "wrong size align");
 
 static void setSize() {
     gtk_window_move(GTK_WINDOW(top), size.x, size.y);
@@ -230,6 +252,8 @@ static struct {
     int16_t width, height;
 } layout;
 
+_Static_assert(sizeof layout == 12, "wrong layout align");
+
 static void setLayout() {
     layout_create(layout.id, layout.parent_id);
     layout_size(layout.id, layout.x, layout.y, layout.width, layout.height);
@@ -257,6 +281,8 @@ static struct {
     int16_t width, height;
 } layoutSize;
 
+_Static_assert(sizeof layoutSize == 10, "wrong layoutSize align");
+
 static void sizeLayout() {
     layout_size(layoutSize.id, layoutSize.x, layoutSize.y, layoutSize.width, layoutSize.height);
 }
@@ -282,6 +308,8 @@ static struct {
     int16_t width, height;
 } window;
 
+_Static_assert(sizeof window == 12, "wrong window align");
+
 static void setWindow() {
     window_create(window.id, window.layout_id);
     window_size(window.id, window.x, window.y, window.width, window.height);
@@ -298,6 +326,8 @@ static struct {
     int16_t x, y;
     int16_t width, height;
 } windowSize;
+
+_Static_assert(sizeof windowSize == 10, "wrong windowSize align");
 
 static void setWindowSize() {
     window_size(windowSize.id, windowSize.x, windowSize.y, windowSize.width, windowSize.height);
@@ -329,6 +359,8 @@ static struct {
     int16_t id;
     int16_t parent;
 } menu;
+
+_Static_assert(sizeof menu == 4, "wrong menu align");
 
 static void addMenu(void *label) {
     menu_node_add(menu.id, menu.parent, label);
