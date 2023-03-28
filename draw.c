@@ -34,11 +34,9 @@ typedef struct {
 } elem_fill;
 
 void elem_fill_draw(cairo_t *cr, elem_fill *e) {
-    cairo_save(cr);
     cairo_set_source_rgb(cr, e->r, e->g, e->b);
     cairo_rectangle(cr, e->x, e->y, e->width, e->height);
     cairo_fill(cr);
-    cairo_restore(cr);
 }
 
 void elem_fill_destroy(elem_fill *e) {}
@@ -65,13 +63,11 @@ typedef struct {
 } elem_line;
 
 void elem_line_draw(cairo_t *cr, elem_line *e) {
-    cairo_save(cr);
     cairo_set_source_rgb(cr, e->r, e->g, e->b);
     cairo_set_line_width(cr, 1);
     cairo_move_to(cr, e->x0 + 0.5, e->y0 + 0.5);
     cairo_line_to(cr, e->x1 + 0.5, e->y1 + 0.5);
     cairo_stroke(cr);
-    cairo_restore(cr);
 }
 
 void elem_line_destroy(elem_line *e) {}
@@ -142,14 +138,12 @@ typedef struct {
 } elem_image;
 
 void elem_image_draw(cairo_t *cr, elem_image *e) {
-    cairo_save(cr);
     image_elem *ie = get_image(e->imageid);
     double scale_x = (double)(ie->width) / (double)(e->width);
     double scale_y = (double)(ie->height) / (double)(e->height);
     cairo_surface_set_device_scale(ie->image, scale_x, scale_y);
     cairo_set_source_surface(cr, ie->image, e->x, e->y);
     cairo_paint(cr);
-    cairo_restore(cr);
 }
 
 void elem_image_destroy(elem_image *e) {}
@@ -204,8 +198,12 @@ void font_elem_destroy() {
     }
 }
 
+static PangoContext *top_pango_context = NULL;
+
 void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *descent) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
+    if (top_pango_context == NULL)
+        top_pango_context = gtk_widget_get_pango_context(top);
+    PangoLayout *layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     *baseline = (int16_t)rintl((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
     PangoFontMetrics *metrics =
@@ -219,7 +217,9 @@ void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *d
 // text split
 
 int16_t *font_split_text(int fontid, char *text, int edge) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
+    if (top_pango_context == NULL)
+        top_pango_context = gtk_widget_get_pango_context(top);
+    PangoLayout *layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
     pango_layout_set_width(layout, PANGO_SCALE * edge);
@@ -239,7 +239,9 @@ int16_t *font_split_text(int fontid, char *text, int edge) {
 // text rect
 
 void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
-    PangoLayout *layout = pango_layout_new(gtk_widget_get_pango_context(top));
+    if (top_pango_context == NULL)
+        top_pango_context = gtk_widget_get_pango_context(top);
+    PangoLayout *layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_text(layout, text, -1);
     int w, h;
@@ -266,11 +268,9 @@ void elem_text_draw(cairo_t *cr, elem_text *e) {
         pango_layout_set_font_description(e->layout, get_font(e->fontid)->desc);
         pango_layout_set_text(e->layout, e->text, -1);
     }
-    cairo_save(cr);
     cairo_set_source_rgb(cr, e->r, e->g, e->b);
     cairo_move_to(cr, e->x, e->y);
     pango_cairo_show_layout(cr, e->layout);
-    cairo_restore(cr);
 }
 
 void elem_text_destroy(elem_text *e) {
@@ -300,6 +300,7 @@ void elem_clear(int id) { draw_destroy(window_get_data(id)); }
 // callback
 
 gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
+    cairo_save(cr);
     for (void *e = id_list_root(data); e != NULL; e = id_list_elem_next(e)) {
         draw_type *t = id_list_elem_data(e);
         switch (t->type) {
@@ -317,6 +318,7 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data) {
             break;
         }
     }
+    cairo_restore(cr);
     return FALSE;
 }
 
