@@ -484,5 +484,9 @@ void callcommand(char command, pipe_buffer *target) {
     case 'G':
         commandMenuItem(target);
         break;
+
+    default:
+        printf("unknown command, char = %d\n", command);
+        exit(EXIT_FAILURE);
     }
 }
