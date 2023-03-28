@@ -216,13 +216,14 @@ void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *d
 
 // text split
 
-int16_t *font_split_text(int fontid, char *text, int edge) {
+int16_t *font_split_text(int fontid, char *text, int edge, int indent) {
     if (top_pango_context == NULL)
         top_pango_context = gtk_widget_get_pango_context(top);
     PangoLayout *layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
     pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
     pango_layout_set_width(layout, PANGO_SCALE * edge);
+    pango_layout_set_indent(layout, PANGO_SCALE * indent);
     pango_layout_set_text(layout, text, -1);
     int length = pango_layout_get_line_count(layout);
     int16_t *out = malloc(sizeof(int16_t) * (length + 1));

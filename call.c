@@ -171,12 +171,13 @@ static void commandFont(pipe_buffer *target) {
 static struct {
     int16_t fontid;
     int16_t edge;
+    int16_t indent;
 } split;
 
-_Static_assert(sizeof split == 4, "wrong split align");
+_Static_assert(sizeof split == 6, "wrong split align");
 
 static void splitText(void *text) {
-    int16_t *out = font_split_text(split.fontid, text, split.edge);
+    int16_t *out = font_split_text(split.fontid, text, split.edge, split.indent);
     if (out == NULL) {
         int16_t value = 0;
         pipe_output_write(&value, sizeof value);
