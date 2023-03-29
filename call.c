@@ -13,6 +13,14 @@ static void commandVersion() {
     pipe_output_flush();
 }
 
+// exit
+
+static void commandExit() {
+    pipe_unwatch();
+    commandVersion();
+    g_application_quit(G_APPLICATION(app));
+}
+
 // clear command
 
 static struct { int16_t id; } windowid;
@@ -405,7 +413,7 @@ void callcommand(char command, pipe_buffer *target) {
         commandTitle(target);
         break;
     case 'X':
-        g_application_quit(G_APPLICATION(app));
+        commandExit();
         break;
     case 'V':
         commandVersion(target);

@@ -34,17 +34,29 @@ gboolean pipe_error_func(GIOChannel *source, GIOCondition condition, gpointer da
     return TRUE;
 }
 
+static guint chan_input_in_id;
+static guint chan_input_hup_id;
+static guint chan_stream_in_id;
+static guint chan_stream_hup_id;
+
 void pipe_init(char *pipe_suffix, GIOFunc func) {
     handle_output = pipe_open(FIFO_OUTPUT_PATH, pipe_suffix, "w");
     handle_event = pipe_open(FIFO_EVENT_PATH, pipe_suffix, "w");
     handle_input = pipe_open(FIFO_INPUT_PATH, pipe_suffix, "r");
     handle_stream = pipe_open(FIFO_STREAM_PATH, pipe_suffix, "r");
     GIOChannel *chan_input = g_io_channel_unix_new(fileno(handle_input));
+    chan_input_in_id = g_io_add_watch(chan_input, G_IO_IN, func, io_input());
+    chan_input_hup_id = g_io_add_watch(chan_input, G_IO_HUP, pipe_error_func, NULL);
     GIOChannel *chan_stream = g_io_channel_unix_new(fileno(handle_stream));
-    g_io_add_watch(chan_input, G_IO_IN, func, io_input());
-    g_io_add_watch(chan_input, G_IO_HUP, pipe_error_func, NULL);
-    g_io_add_watch(chan_stream, G_IO_IN, func, io_stream());
-    g_io_add_watch(chan_stream, G_IO_HUP, pipe_error_func, NULL);
+    chan_stream_in_id = g_io_add_watch(chan_stream, G_IO_IN, func, io_stream());
+    chan_stream_hup_id = g_io_add_watch(chan_stream, G_IO_HUP, pipe_error_func, NULL);
+}
+
+void pipe_unwatch() {
+    g_source_remove(chan_input_in_id);
+    g_source_remove(chan_input_hup_id);
+    g_source_remove(chan_stream_in_id);
+    g_source_remove(chan_stream_hup_id);
 }
 
 void pipe_done() {

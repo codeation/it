@@ -19,6 +19,7 @@ extern GMenu *barmenu;
 
 void pipe_init();
 void pipe_done();
+void pipe_unwatch();
 void pipe_output_write(void *data, int length);
 void pipe_output_flush();
 void pipe_event_write(void *data, int length);
