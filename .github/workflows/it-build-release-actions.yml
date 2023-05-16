@@ -41,7 +41,7 @@ jobs:
         run: gcc --version
       - name: Install GTK 3 (apt-get)
         if: ${{ matrix.target == 'linux' }}
-        run: sudo apt-get install libgtk-3-dev
+        run: sudo apt-get install libgtk-3-dev libsystemd-dev
       - name: Install GTK 3 (brew)
         if: ${{ matrix.target == 'darwin' }}
         run: brew install gtk+3
