@@ -68,9 +68,7 @@ gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     char *name = gdk_keyval_name(event->keyval);
-    int16_t length = strlen(name);
-    pipe_event_write(&length, sizeof length);
-    pipe_event_write(name, length);
+    pipe_event_write_string(name);
     pipe_event_flush();
     return TRUE;
 }
@@ -120,8 +118,8 @@ gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
 }
 
 typedef struct {
-    uint16_t direction;
-    uint16_t delta_x, delta_y;
+    int16_t direction;
+    int16_t delta_x, delta_y;
 } scroll_event;
 
 gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
@@ -141,8 +139,6 @@ gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
 void s_menu_action(char *name) {
     char command_type = 'u';
     pipe_event_write(&command_type, sizeof command_type);
-    int16_t length = strlen(name);
-    pipe_event_write(&length, sizeof length);
-    pipe_event_write(name, length);
+    pipe_event_write_string(name);
     pipe_event_flush();
 }

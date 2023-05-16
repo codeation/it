@@ -7,9 +7,7 @@
 // driver version
 
 static void commandVersion() {
-    int16_t length = strlen(it_version);
-    pipe_output_write(&length, sizeof length);
-    pipe_output_write(it_version, length);
+    pipe_output_write_string(it_version);
     pipe_output_flush();
 }
 

@@ -85,6 +85,12 @@ void pipe_output_write(void *data, int length) {
     }
 }
 
+void pipe_output_write_string(char *data) {
+    int32_t length = strlen(data);
+    pipe_output_write(&length, sizeof length);
+    pipe_output_write(data, length);
+}
+
 void pipe_output_flush() { fflush(handle_output); }
 
 void pipe_event_write(void *data, int length) {
@@ -92,6 +98,12 @@ void pipe_event_write(void *data, int length) {
         perror("pipe write (e)");
         exit(EXIT_FAILURE);
     }
+}
+
+void pipe_event_write_string(char *data) {
+    int32_t length = strlen(data);
+    pipe_event_write(&length, sizeof length);
+    pipe_event_write(data, length);
 }
 
 void pipe_event_flush() { fflush(handle_event); }
