@@ -2,6 +2,14 @@
 
 This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
+The impress library uses a separate application to low-level drawing.
+
+<img src="https://codeation.github.io/images/it_scheme.png" width="580" height="274" />
+
+The main GUI application contains pure Go code. There is not any low-level library required to build the main application. The impress terminal is running in parallel. Impress terminal was written in C and used the GTK-3 library. Named pipes are used to communicate between the main application and impress terminal.
+
+Impress terminal started and stopped by main application. By default, executable impress terminal binary launched from current directory. The environment variable `IMPRESS_TERMINAL_PATH` may be used to specify full pathname to impress terminal binary.
+
 ## Building (Linux + docker)
 
 To build binary, download the sources:
