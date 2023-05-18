@@ -1,5 +1,7 @@
 # impress terminal application
 
+![build release](https://github.com/codeation/it/actions/workflows/it-build-release-actions.yml/badge.svg)
+
 This is a part of cross-platform GUI Library for Go. See https://github.com/codeation/impress
 
 The impress library uses a separate application to low-level drawing.
