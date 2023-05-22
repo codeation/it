@@ -11,12 +11,16 @@ struct _id_list_elem {
 struct _id_list {
     id_list_elem *root;
     id_list_elem *tail;
+    int cache_id;
+    id_list_elem *cache_elem;
 };
 
 id_list *id_list_new() {
     id_list *list = malloc(sizeof(id_list));
     list->root = NULL;
     list->tail = NULL;
+    list->cache_id = -1;
+    list->cache_elem = NULL;
     return list;
 }
 
@@ -35,8 +39,13 @@ void id_list_append(id_list *list, int id, void *data) {
 }
 
 void *id_list_get_data(id_list *list, int id) {
+    if (list->cache_id == id) {
+        return list->cache_elem->data;
+    }
     for (id_list_elem *e = list->root; e != NULL; e = e->next) {
         if (e->id == id) {
+            list->cache_id = id;
+            list->cache_elem = e;
             return e->data;
         }
     }
@@ -46,6 +55,8 @@ void *id_list_get_data(id_list *list, int id) {
 }
 
 void *id_list_remove(id_list *list, int id) {
+    list->cache_id = -1;
+    list->cache_elem = NULL;
     void *data = NULL;
     id_list_elem *prev = NULL;
     for (id_list_elem *e = list->root; e != NULL; e = e->next) {
@@ -70,6 +81,8 @@ void *id_list_remove(id_list *list, int id) {
 }
 
 void *id_list_remove_any(id_list *list) {
+    list->cache_id = -1;
+    list->cache_elem = NULL;
     if (list->root == NULL) {
         return NULL;
     }
