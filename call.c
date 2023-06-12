@@ -159,8 +159,9 @@ _Static_assert(sizeof font == 12, "wrong font align");
 static void setFont(void *family) {
     font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight,
                   font.stretch);
-    int16_t baseline, ascent, descent;
-    get_font_metrics(font.id, &baseline, &ascent, &descent);
+    int16_t lineheight, baseline, ascent, descent;
+    get_font_metrics(font.id, &lineheight, &baseline, &ascent, &descent);
+    pipe_output_write(&lineheight, sizeof lineheight);
     pipe_output_write(&baseline, sizeof baseline);
     pipe_output_write(&ascent, sizeof ascent);
     pipe_output_write(&descent, sizeof descent);
@@ -170,6 +171,18 @@ static void setFont(void *family) {
 
 static void commandFont(pipe_buffer *target) {
     parameters_alloc_to_call(target, &font, sizeof font, setFont);
+}
+
+// remove font
+
+static struct { int16_t id; } fontid;
+
+_Static_assert(sizeof fontid == 2, "wrong fontid align");
+
+static void setFontRem() { font_elem_rem(fontid.id); }
+
+static void commandFontRem(pipe_buffer *target) {
+    parameters_to_call(target, &fontid, sizeof fontid, setFontRem);
 }
 
 // split text
@@ -476,6 +489,9 @@ void callcommand(char command, pipe_buffer *target) {
     // font
     case 'N':
         commandFont(target);
+        break;
+    case 'K':
+        commandFontRem(target);
         break;
     case 'P':
         commandSplit(target);

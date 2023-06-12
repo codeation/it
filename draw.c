@@ -65,8 +65,16 @@ typedef struct {
 void elem_line_draw(cairo_t *cr, elem_line *e) {
     cairo_set_source_rgb(cr, e->r, e->g, e->b);
     cairo_set_line_width(cr, 1);
-    cairo_move_to(cr, e->x0 + 0.5, e->y0 + 0.5);
-    cairo_line_to(cr, e->x1 + 0.5, e->y1 + 0.5);
+    if (e->x0 == e->x1) {
+        cairo_move_to(cr, e->x0 + 0.5, e->y0);
+        cairo_line_to(cr, e->x1 + 0.5, e->y1);
+    } else if (e->y0 == e->y1) {
+        cairo_move_to(cr, e->x0, e->y0 + 0.5);
+        cairo_line_to(cr, e->x1, e->y1 + 0.5);
+    } else {
+        cairo_move_to(cr, e->x0, e->y0);
+        cairo_line_to(cr, e->x1, e->y1);
+    }
     cairo_stroke(cr);
 }
 
@@ -188,6 +196,12 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     id_list_append(font_list, id, e);
 }
 
+void font_elem_rem(int id) {
+    font_elem *e = id_list_remove(font_list, id);
+    pango_font_description_free(e->desc);
+    free(e);
+}
+
 void font_elem_destroy() {
     while (TRUE) {
         font_elem *e = id_list_remove_any(font_list);
@@ -200,16 +214,18 @@ void font_elem_destroy() {
 
 static PangoContext *top_pango_context = NULL;
 
-void get_font_metrics(int fontid, int16_t *baseline, int16_t *ascent, int16_t *descent) {
+void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent,
+                      int16_t *descent) {
     if (top_pango_context == NULL)
         top_pango_context = gtk_widget_get_pango_context(top);
     PangoLayout *layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(layout, get_font(fontid)->desc);
-    *baseline = (int16_t)rintl((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
+    *baseline = (int16_t)rint((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
     PangoFontMetrics *metrics =
         pango_context_get_metrics(pango_layout_get_context(layout), get_font(fontid)->desc, NULL);
-    *ascent = (int16_t)rintl((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
-    *descent = (int16_t)rintl((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
+    *lineheight = (int16_t)rint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
+    *ascent = (int16_t)rint((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
+    *descent = (int16_t)rint((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
     pango_font_metrics_unref(metrics);
     g_object_unref(layout);
 }

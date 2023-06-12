@@ -51,9 +51,9 @@ void layout_size(int id, int x, int y, int width, int height) {
         l->x = x;
         l->y = y;
         if (GTK_IS_LAYOUT(l->parent))
-            gtk_layout_move(GTK_LAYOUT(l->parent),l->layout, l->x, l->y);
-        else 
-            gtk_fixed_move(GTK_FIXED(l->parent),l->layout, l->x, l->y);
+            gtk_layout_move(GTK_LAYOUT(l->parent), l->layout, l->x, l->y);
+        else
+            gtk_fixed_move(GTK_FIXED(l->parent), l->layout, l->x, l->y);
         gtk_widget_set_size_request(l->layout, width, height);
     }
 }
@@ -65,8 +65,8 @@ void layout_raise(int id) {
         gtk_container_remove(GTK_CONTAINER(l->parent), l->layout);
         gtk_container_add(GTK_CONTAINER(l->parent), l->layout);
         if (GTK_IS_LAYOUT(l->parent))
-            gtk_layout_move(GTK_LAYOUT(l->parent),l->layout, l->x, l->y);
-        else 
-            gtk_fixed_move(GTK_FIXED(l->parent),l->layout, l->x, l->y);
+            gtk_layout_move(GTK_LAYOUT(l->parent), l->layout, l->x, l->y);
+        else
+            gtk_fixed_move(GTK_FIXED(l->parent), l->layout, l->x, l->y);
     }
 }

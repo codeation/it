@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEV_GCC_VERSION=12.2.0
+DEV_GCC_VERSION=12.3.0
 
 docker build \
     --build-arg dev_gcc_version=$DEV_GCC_VERSION \

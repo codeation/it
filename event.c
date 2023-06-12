@@ -44,7 +44,7 @@ gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return TRUE;
+    return FALSE;
 }
 
 // Keyboard events
@@ -86,12 +86,12 @@ gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     button_event e;
     e.type = event->type;
     e.button = event->button;
-    e.x = (int16_t)(rintl(event->x) - layoutOffsetX);
-    e.y = (int16_t)(rintl(event->y) - layoutOffsetY);
+    e.x = (int16_t)(rint(event->x) - layoutOffsetX);
+    e.y = (int16_t)(rint(event->y) - layoutOffsetY);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return TRUE;
+    return FALSE;
 }
 
 typedef struct {
@@ -105,8 +105,8 @@ typedef struct {
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     char command_type = 'm';
     motion_event e;
-    e.x = (int16_t)(rintl(event->x) - layoutOffsetX);
-    e.y = (int16_t)(rintl(event->y) - layoutOffsetY);
+    e.x = (int16_t)(rint(event->x) - layoutOffsetX);
+    e.y = (int16_t)(rint(event->y) - layoutOffsetY);
     e.shift = event->state & GDK_SHIFT_MASK ? 1 : 0;
     e.control = event->state & GDK_CONTROL_MASK ? 1 : 0;
     e.alt = event->state & GDK_MOD1_MASK ? 1 : 0;
@@ -114,7 +114,7 @@ gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
-    return TRUE;
+    return FALSE;
 }
 
 typedef struct {

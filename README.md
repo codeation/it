@@ -38,8 +38,7 @@ it-build/gcc
 
 ## Building (Linux)
 
-Currently, the application uses [GTK+ 3](https://www.gtk.org)
-for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
+Currently, the application uses [GTK+ 3](https://www.gtk.org) for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
 
 On Debian/ Ubuntu you can run:
 
@@ -63,6 +62,8 @@ make
 ```
 
 ## Building (macOS)
+
+*The latest releases aren't tested on Apple machines. The earlier version tested on both Intel and Silicon platform and worked well. Please, open [issue](https://github.com/codeation/impress/issues), if some bugs have raised. MRs are welcome too.*
 
 First install [Homebrew](https://brew.sh/) if you don't have installed.
 
