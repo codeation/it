@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
+
 GtkApplication *app = NULL;
 GtkWidget *top = NULL;
 
@@ -10,6 +14,8 @@ GMenu *appmenu = NULL;
 GMenu *barmenu = NULL;
 
 static char *pipe_suffix;
+
+gboolean is_wayland_backend = FALSE;
 
 static void on_app_activate(GApplication *application, gpointer data) {
     appmenu = g_menu_new();
@@ -27,6 +33,13 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_signal_connect(top, "button_release_event", G_CALLBACK(s_button), NULL);
     g_signal_connect(top, "motion_notify_event", G_CALLBACK(s_motion), NULL);
     g_signal_connect(top, "scroll-event", G_CALLBACK(s_scroll), NULL);
+
+#ifdef GDK_WINDOWING_WAYLAND
+    GdkDisplayManager *display_manager = gdk_display_manager_get();
+    if (GDK_IS_WAYLAND_DISPLAY(gdk_display_manager_get_default_display(display_manager))) {
+        is_wayland_backend = TRUE;
+    }
+#endif
 
     pipe_init(pipe_suffix, async_read_chan);
 }

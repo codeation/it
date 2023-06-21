@@ -12,30 +12,6 @@ The main GUI application contains pure Go code. There is not any low-level libra
 
 Impress terminal started and stopped by main application. By default, executable impress terminal binary launched from current directory. The environment variable `IMPRESS_TERMINAL_PATH` may be used to specify full pathname to impress terminal binary.
 
-## Building (Linux + docker)
-
-To build binary, download the sources:
-
-```
-git clone https://github.com/codeation/it.git
-cd it
-```
-
-and use the following command in project directory:
-
-```
-./build.sh
-```
-
-This command creates a container with libgtk-3-dev packages from the gcc compiler container. The build is done inside the docker container without installing additional packages on the host.
-
-Once the build is complete, the docker images can be removed using the `docker image rm` command. You can remove containers named:
-
-```
-amd64/gcc or arm64v8/gcc
-it-build/gcc
-```
-
 ## Building (Linux)
 
 Currently, the application uses [GTK+ 3](https://www.gtk.org) for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
@@ -60,6 +36,32 @@ and use the following command in project directory:
 ```
 make
 ```
+
+## Building (Debian 12 + docker)
+
+To build binary, download the sources:
+
+```
+git clone https://github.com/codeation/it.git
+cd it
+```
+
+and use the following command in project directory:
+
+```
+./build.sh
+```
+
+This command creates a container with libgtk-3-dev packages from the gcc compiler container. The build is done inside the docker container without installing additional packages on the host.
+
+Once the build is complete, the docker images can be removed using the `docker image rm` command. You can remove containers named:
+
+```
+amd64/gcc or arm64v8/gcc
+it-build/gcc
+```
+
+*On Debian 12, `libharfbuzz-gobject` should be installed. If you are getting `error while loading shared libraries: libharfbuzz-gobject.so.0: cannot open shared object file: No such file or directory`, run `sudo apt-get install libharfbuzz-gobject0`.*
 
 ## Building (macOS)
 

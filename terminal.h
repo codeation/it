@@ -15,6 +15,8 @@ extern GtkWidget *top;
 extern GMenu *appmenu;
 extern GMenu *barmenu;
 
+extern gboolean is_wayland_backend;
+
 // network
 
 void pipe_init();

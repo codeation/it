@@ -37,10 +37,19 @@ gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data
     gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
     char command_type = 'f';
     configure_event e;
-    e.width = event->width;
-    e.height = event->height;
-    e.inner_width = event->width - layoutOffsetX;
-    e.inner_height = event->height - layoutOffsetY;
+    if (is_wayland_backend) {
+        gint w, h;
+        gtk_window_get_size(GTK_WINDOW(top), &w, &h);
+        e.width = w;
+        e.height = h;
+        e.inner_width = gtk_widget_get_allocated_width(layout);
+        e.inner_height = gtk_widget_get_allocated_height(layout);
+    } else {
+        e.width = event->width;
+        e.height = event->height;
+        e.inner_width = e.width - layoutOffsetX;
+        e.inner_height = e.height - layoutOffsetY;
+    }
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -82,6 +91,11 @@ typedef struct {
 } button_event;
 
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+    static guint32 prev_time = 0;
+    if (event->time == prev_time) {
+        return FALSE;
+    }
+    prev_time = event->time;
     char command_type = 'b';
     button_event e;
     e.type = event->type;
@@ -103,6 +117,11 @@ typedef struct {
 } motion_event;
 
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
+    static guint32 prev_time = 0;
+    if (event->time == prev_time) {
+        return FALSE;
+    }
+    prev_time = event->time;
     char command_type = 'm';
     motion_event e;
     e.x = (int16_t)(rint(event->x) - layoutOffsetX);

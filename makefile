@@ -2,10 +2,10 @@ CFLAGS=$(shell pkg-config --cflags gtk+-3.0)
 LDFLAGS=$(shell pkg-config --libs --static gtk+-3.0)
 
 it: call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o
-	gcc -o it call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -lm
+	gcc -o it call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -lm -Wall -Ofast
 
 %.o: %.c terminal.h idlist.h
-	gcc -c $(CFLAGS) $<
+	gcc -c $(CFLAGS) -Wall -Ofast $<
 
 clean:
 	rm *.o
@@ -19,6 +19,7 @@ format:
 	clang-format -i idlist.h
 	clang-format -i idlist.c
 	clang-format -i io.c
+	clang-format -i layout.c
 	clang-format -i main.c
 	clang-format -i menu.c
 	clang-format -i pipe.c
