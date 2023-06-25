@@ -10,7 +10,6 @@
 GtkApplication *app = NULL;
 GtkWidget *top = NULL;
 
-GMenu *appmenu = NULL;
 GMenu *barmenu = NULL;
 
 static char *pipe_suffix;
@@ -18,9 +17,6 @@ static char *pipe_suffix;
 gboolean is_wayland_backend = FALSE;
 
 static void on_app_activate(GApplication *application, gpointer data) {
-    appmenu = g_menu_new();
-    gtk_application_set_app_menu(GTK_APPLICATION(app), G_MENU_MODEL(appmenu));
-    g_object_unref(appmenu);
     barmenu = g_menu_new();
     gtk_application_set_menubar(GTK_APPLICATION(app), G_MENU_MODEL(barmenu));
     g_object_unref(barmenu);

@@ -30,24 +30,16 @@ void menu_node_add(int id, int parent, char *label) {
         menu_list = id_list_new();
     }
     menu_elem *m = malloc(sizeof(menu_elem));
-    if (id == 1) {
-        m->menu = appmenu;
-    } else {
-        m->menu = g_menu_new();
-    }
+    m->menu = g_menu_new();
     m->label = label;
     id_list_append(menu_list, id, m);
     if (parent == 0) {
-        if (id > 1) {
-            g_menu_append_submenu(barmenu, m->label, G_MENU_MODEL(m->menu));
-        }
+        g_menu_append_submenu(barmenu, m->label, G_MENU_MODEL(m->menu));
     } else {
         menu_elem *p = (menu_elem *)id_list_get_data(menu_list, parent);
         g_menu_append_submenu(p->menu, m->label, G_MENU_MODEL(m->menu));
     }
-    if (id != 1) {
-        g_object_unref(m->menu);
-    }
+    g_object_unref(m->menu);
 }
 
 void menu_item_click(GSimpleAction *action, GVariant *parameter, gpointer p) {

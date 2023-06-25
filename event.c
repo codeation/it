@@ -30,7 +30,7 @@ typedef struct {
 } configure_event;
 
 gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
-    static GtkWidget *layout;
+    static GtkWidget *layout = NULL;
     if (layout == NULL) {
         layout = layout_get_widget(1);
     }
@@ -54,6 +54,30 @@ gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
     return FALSE;
+}
+
+void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) {
+    static gboolean done = FALSE;
+    if (done) {
+        return;
+    }
+    done = TRUE;
+    static GtkWidget *layout = NULL;
+    if (layout == NULL) {
+        layout = layout_get_widget(1);
+    }
+    gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
+    char command_type = 'f';
+    configure_event e;
+    gint w, h;
+    gtk_window_get_size(GTK_WINDOW(top), &w, &h);
+    e.width = w;
+    e.height = h;
+    e.inner_width = gtk_widget_get_allocated_width(layout);
+    e.inner_height = gtk_widget_get_allocated_height(layout);
+    pipe_event_write(&command_type, sizeof command_type);
+    pipe_event_write(&e, sizeof e);
+    pipe_event_flush();
 }
 
 // Keyboard events
