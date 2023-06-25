@@ -12,10 +12,7 @@ extern char *it_version;
 extern GtkApplication *app;
 extern GtkWidget *top;
 
-extern GMenu *appmenu;
 extern GMenu *barmenu;
-
-extern gboolean is_wayland_backend;
 
 // network
 

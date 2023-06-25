@@ -14,8 +14,6 @@ GMenu *barmenu = NULL;
 
 static char *pipe_suffix;
 
-gboolean is_wayland_backend = FALSE;
-
 static void on_app_activate(GApplication *application, gpointer data) {
     barmenu = g_menu_new();
     gtk_application_set_menubar(GTK_APPLICATION(app), G_MENU_MODEL(barmenu));
@@ -29,13 +27,6 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_signal_connect(top, "button_release_event", G_CALLBACK(s_button), NULL);
     g_signal_connect(top, "motion_notify_event", G_CALLBACK(s_motion), NULL);
     g_signal_connect(top, "scroll-event", G_CALLBACK(s_scroll), NULL);
-
-#ifdef GDK_WINDOWING_WAYLAND
-    GdkDisplayManager *display_manager = gdk_display_manager_get();
-    if (GDK_IS_WAYLAND_DISPLAY(gdk_display_manager_get_default_display(display_manager))) {
-        is_wayland_backend = TRUE;
-    }
-#endif
 
     pipe_init(pipe_suffix, async_read_chan);
 }

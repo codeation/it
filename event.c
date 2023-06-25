@@ -29,39 +29,7 @@ typedef struct {
     uint16_t inner_width, inner_height;
 } configure_event;
 
-gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
-    static GtkWidget *layout = NULL;
-    if (layout == NULL) {
-        layout = layout_get_widget(1);
-    }
-    gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
-    char command_type = 'f';
-    configure_event e;
-    if (is_wayland_backend) {
-        gint w, h;
-        gtk_window_get_size(GTK_WINDOW(top), &w, &h);
-        e.width = w;
-        e.height = h;
-        e.inner_width = gtk_widget_get_allocated_width(layout);
-        e.inner_height = gtk_widget_get_allocated_height(layout);
-    } else {
-        e.width = event->width;
-        e.height = event->height;
-        e.inner_width = e.width - layoutOffsetX;
-        e.inner_height = e.height - layoutOffsetY;
-    }
-    pipe_event_write(&command_type, sizeof command_type);
-    pipe_event_write(&e, sizeof e);
-    pipe_event_flush();
-    return FALSE;
-}
-
-void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) {
-    static gboolean done = FALSE;
-    if (done) {
-        return;
-    }
-    done = TRUE;
+static void write_configure_event() {
     static GtkWidget *layout = NULL;
     if (layout == NULL) {
         layout = layout_get_widget(1);
@@ -78,6 +46,20 @@ void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) 
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
+}
+
+gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
+    write_configure_event();
+    return FALSE;
+}
+
+void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) {
+    static gboolean done = FALSE;
+    if (done) {
+        return;
+    }
+    done = TRUE;
+    write_configure_event();
 }
 
 // Keyboard events
