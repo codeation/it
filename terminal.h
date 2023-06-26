@@ -91,10 +91,10 @@ void draw_data_free(void *v);
 void draw_destroy(void *v);
 
 void elem_clear(int id);
-void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b);
-void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b);
+void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a);
+void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 void elem_image_add(int id, int x, int y, int width, int height, int imageid);
-void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b);
+void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a);
 
 // menu
 

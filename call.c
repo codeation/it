@@ -44,13 +44,14 @@ static void commandShow(pipe_buffer *target) {
 static struct {
     int16_t id;
     int16_t x, y, width, height;
-    uint16_t r, g, b;
+    uint16_t r, g, b, a;
 } fill;
 
-_Static_assert(sizeof fill == 16, "wrong fill align");
+_Static_assert(sizeof fill == 18, "wrong fill align");
 
 static void setFill() {
-    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b);
+    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b,
+                  fill.a);
 }
 
 static void commandFill(pipe_buffer *target) {
@@ -63,13 +64,13 @@ static struct {
     int16_t id;
     int16_t x0, y0;
     int16_t x1, y1;
-    uint16_t r, g, b;
+    uint16_t r, g, b, a;
 } line;
 
-_Static_assert(sizeof line == 16, "wrong line align");
+_Static_assert(sizeof line == 18, "wrong line align");
 
 static void setLine() {
-    elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b);
+    elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b, line.a);
 }
 
 static void commandLine(pipe_buffer *target) {
@@ -81,15 +82,16 @@ static void commandLine(pipe_buffer *target) {
 static struct {
     int16_t id;
     int16_t x, y;
-    uint16_t r, g, b;
+    uint16_t r, g, b, a;
     int16_t fontid;
     int16_t fontsize;
 } point;
 
-_Static_assert(sizeof point == 16, "wrong point align");
+_Static_assert(sizeof point == 18, "wrong point align");
 
 static void setText(void *text) {
-    elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b);
+    elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b,
+                  point.a);
     // free(text) in elem_text_destroy
 }
 

@@ -30,18 +30,18 @@ typedef struct {
 typedef struct {
     int type;
     int x, y, width, height;
-    double r, g, b;
+    double r, g, b, a;
 } elem_fill;
 
 void elem_fill_draw(cairo_t *cr, elem_fill *e) {
-    cairo_set_source_rgb(cr, e->r, e->g, e->b);
+    cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_rectangle(cr, e->x, e->y, e->width, e->height);
     cairo_fill(cr);
 }
 
 void elem_fill_destroy(elem_fill *e) {}
 
-void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b) {
+void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a) {
     elem_fill *e = malloc(sizeof(elem_fill));
     e->type = DRAW_ELEM_FILL;
     e->x = x;
@@ -51,6 +51,7 @@ void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, in
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;
+    e->a = (double)a / (double)0xFFFF;
     draw_elem_add(window_get_data(id), e);
 }
 
@@ -59,11 +60,11 @@ void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, in
 typedef struct {
     int type;
     int x0, y0, x1, y1;
-    double r, g, b;
+    double r, g, b, a;
 } elem_line;
 
 void elem_line_draw(cairo_t *cr, elem_line *e) {
-    cairo_set_source_rgb(cr, e->r, e->g, e->b);
+    cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_set_line_width(cr, 1);
     if (e->x0 == e->x1) {
         cairo_move_to(cr, e->x0 + 0.5, e->y0);
@@ -80,7 +81,7 @@ void elem_line_draw(cairo_t *cr, elem_line *e) {
 
 void elem_line_destroy(elem_line *e) {}
 
-void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b) {
+void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a) {
     elem_line *e = malloc(sizeof(elem_line));
     e->type = DRAW_ELEM_LINE;
     e->x0 = x0;
@@ -90,6 +91,7 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b) 
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;
+    e->a = (double)a / (double)0xFFFF;
     draw_elem_add(window_get_data(id), e);
 }
 
@@ -275,7 +277,7 @@ typedef struct {
     int x, y;
     char *text;
     int fontid;
-    double r, g, b;
+    double r, g, b, a;
     PangoLayout *layout;
 } elem_text;
 
@@ -285,7 +287,7 @@ void elem_text_draw(cairo_t *cr, elem_text *e) {
         pango_layout_set_font_description(e->layout, get_font(e->fontid)->desc);
         pango_layout_set_text(e->layout, e->text, -1);
     }
-    cairo_set_source_rgb(cr, e->r, e->g, e->b);
+    cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_move_to(cr, e->x, e->y);
     pango_cairo_show_layout(cr, e->layout);
 }
@@ -296,7 +298,7 @@ void elem_text_destroy(elem_text *e) {
     free(e->text);
 }
 
-void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b) {
+void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a) {
     elem_text *e = malloc(sizeof(elem_text));
     e->type = DRAW_ELEM_TEXT;
     e->x = x;
@@ -306,6 +308,7 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;
+    e->a = (double)a / (double)0xFFFF;
     e->layout = NULL;
     draw_elem_add(window_get_data(id), e);
 }
