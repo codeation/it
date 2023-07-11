@@ -84,10 +84,9 @@ static struct {
     int16_t x, y;
     uint16_t r, g, b, a;
     int16_t fontid;
-    int16_t fontsize;
 } point;
 
-_Static_assert(sizeof point == 18, "wrong point align");
+_Static_assert(sizeof point == 16, "wrong point align");
 
 static void setText(void *text) {
     elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b,
