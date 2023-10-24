@@ -428,7 +428,7 @@ void callcommand(char command, pipe_buffer *target) {
         commandExit();
         break;
     case 'V':
-        commandVersion(target);
+        commandVersion();
         break;
 
     // layout

@@ -16,7 +16,7 @@ extern GMenu *barmenu;
 
 // network
 
-void pipe_init();
+void pipe_init(char *pipe_suffix, GIOFunc func);
 void pipe_done();
 void pipe_unwatch();
 void pipe_output_write(void *data, int length);
