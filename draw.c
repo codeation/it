@@ -110,7 +110,8 @@ static id_list *image_list = NULL;
 image_elem *get_image(int id) { return (image_elem *)id_list_get_data(image_list, id); }
 
 void image_add(int id, int width, int height, unsigned char *data) {
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    int cairo_format = CAIRO_FORMAT_ARGB32;
+    int stride = cairo_format_stride_for_width(cairo_format, width);
     for (int i = 0; i < height; i++) {
         unsigned char *p = data + i * stride;
         for (int j = 0; j < width; j++) {
@@ -124,8 +125,7 @@ void image_add(int id, int width, int height, unsigned char *data) {
     e->data = data;
     e->width = width;
     e->height = height;
-    e->image =
-        cairo_image_surface_create_for_data(e->data, CAIRO_FORMAT_ARGB32, width, height, stride);
+    e->image = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
     if (image_list == NULL)
         image_list = id_list_new();
     id_list_append(image_list, id, e);

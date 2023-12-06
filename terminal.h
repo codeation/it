@@ -19,11 +19,11 @@ extern GMenu *barmenu;
 void pipe_init(char *pipe_suffix, GIOFunc func);
 void pipe_done();
 void pipe_unwatch();
-void pipe_output_write(void *data, int length);
-void pipe_output_write_string(char *data);
+void pipe_output_write(const void *data, const int length);
+void pipe_output_write_string(const char *data);
 void pipe_output_flush();
-void pipe_event_write(void *data, int length);
-void pipe_event_write_string(char *data);
+void pipe_event_write(const void *data, const int length);
+void pipe_event_write_string(const char *data);
 void pipe_event_flush();
 
 // io
@@ -45,6 +45,8 @@ gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);
 gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data);
 void s_menu_action(char *action);
+void request_clipboard(int clipboardtypeid);
+void set_clipboard(int clipboardtypeid, void *data);
 
 // call
 

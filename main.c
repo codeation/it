@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef GDK_WINDOWING_WAYLAND
-#include <gdk/gdkwayland.h>
-#endif
-
 GtkApplication *app = NULL;
 GtkWidget *top = NULL;
 

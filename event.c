@@ -167,3 +167,34 @@ void s_menu_action(char *name) {
     pipe_event_write_string(name);
     pipe_event_flush();
 }
+
+// Clipboard events
+
+typedef struct {
+    int16_t format;
+} clipboard_event;
+
+void s_text_received(GtkClipboard *clipboard, const gchar *text, gpointer data) {
+    if (text == NULL) {
+        return;
+    }
+    char command_type = 'c';
+    pipe_event_write(&command_type, sizeof command_type);
+    clipboard_event e;
+    e.format = 1;
+    pipe_event_write(&e, sizeof e);
+    pipe_event_write_string(text);
+    pipe_event_flush();
+}
+
+void request_clipboard(int clipboardtypeid) {
+    GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    gtk_clipboard_request_text(clipboard, s_text_received, NULL); // TODO text only
+}
+
+// Clipboard funcs
+
+void set_clipboard(int clipboardtypeid, void *data) {
+    GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+    gtk_clipboard_set_text(clipboard, data, -1); // TODO text only
+}

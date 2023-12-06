@@ -413,6 +413,27 @@ static void commandMenuItem(pipe_buffer *target) {
     parameters_alloc_to_call(target, &menu, sizeof menu, setMenuItem);
 }
 
+// clipboard
+
+static struct { int16_t id; } clipboardtypeid;
+
+_Static_assert(sizeof clipboardtypeid == 2, "wrong copy align");
+
+static void clipboardGet() { request_clipboard(clipboardtypeid.id); }
+
+static void commandClipboardGet(pipe_buffer *target) {
+    parameters_to_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardGet);
+}
+
+static void clipboardPut(void *data) {
+    set_clipboard(clipboardtypeid.id, data);
+    free(data);
+}
+
+static void commandClipboardPut(pipe_buffer *target) {
+    parameters_alloc_to_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardPut);
+}
+
 // dispatch
 
 void callcommand(char command, pipe_buffer *target) {
@@ -507,6 +528,14 @@ void callcommand(char command, pipe_buffer *target) {
         break;
     case 'G':
         commandMenuItem(target);
+        break;
+
+    // clipboard
+    case '1':
+        commandClipboardGet(target);
+        break;
+    case '2':
+        commandClipboardPut(target);
         break;
 
     default:
