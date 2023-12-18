@@ -1,6 +1,7 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct pipe_buffer {

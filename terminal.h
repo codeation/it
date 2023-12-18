@@ -1,7 +1,6 @@
 #ifndef _terminal_h_
 #define _terminal_h_
 
-#include "idlist.h"
 #include <gtk/gtk.h>
 #include <stdint.h>
 
