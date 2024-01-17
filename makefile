@@ -1,8 +1,8 @@
 CFLAGS=$(shell pkg-config --cflags gtk+-3.0)
-LDFLAGS=$(shell pkg-config --libs --static gtk+-3.0)
+LDFLAGS=$(shell pkg-config --libs gtk+-3.0)
 
 it: call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o
-	gcc -o it call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -lm -Wall -Ofast
+	gcc -o it call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -Wall -Ofast
 
 %.o: %.c terminal.h idlist.h
 	gcc -c $(CFLAGS) -Wall -Ofast $<
