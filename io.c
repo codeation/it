@@ -13,21 +13,13 @@ typedef struct pipe_buffer {
     int32_t alloc_length;
     char *data;
     void (*last_func)(void *);
+    guint in_id;
+    guint hup_id;
 } pipe_buffer;
 
 static pipe_buffer sync_chan, stream_chan;
 
 static void reset_buffer(pipe_buffer *target);
-
-pipe_buffer *io_input() {
-    reset_buffer(&sync_chan);
-    return &sync_chan;
-}
-
-pipe_buffer *io_stream() {
-    reset_buffer(&stream_chan);
-    return &stream_chan;
-}
 
 static void call_func(pipe_buffer *target) {
     reset_buffer(target);
@@ -104,3 +96,28 @@ gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer da
     }
     return TRUE;
 }
+
+gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpointer data) {
+    perror("connection has been broken");
+    exit(EXIT_FAILURE);
+    return TRUE;
+}
+
+static void io_start(FILE *source, pipe_buffer *target) {
+    reset_buffer(target);
+    GIOChannel *chan = g_io_channel_unix_new(fileno(source));
+    target->in_id = g_io_add_watch(chan, G_IO_IN, async_read_chan, target);
+    target->hup_id = g_io_add_watch(chan, G_IO_HUP, chan_error_func, target);
+    g_io_channel_unref(chan);
+}
+
+void io_input_start(FILE *source) { io_start(source, &sync_chan); }
+void io_stream_start(FILE *source) { io_start(source, &stream_chan); }
+
+void io_stop(pipe_buffer *target) {
+    g_source_remove(target->hup_id);
+    g_source_remove(target->in_id);
+    target->in_id = 0;
+}
+
+gboolean io_exited() { return sync_chan.in_id == 0 && stream_chan.in_id == 0; }

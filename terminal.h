@@ -17,7 +17,6 @@ extern GMenu *barmenu;
 
 void pipe_init(char *pipe_suffix, GIOFunc func);
 void pipe_done();
-void pipe_unwatch();
 void pipe_output_write(const void *data, const int length);
 void pipe_output_write_string(const char *data);
 void pipe_output_flush();
@@ -28,11 +27,13 @@ void pipe_event_flush();
 // io
 
 typedef struct pipe_buffer pipe_buffer;
-pipe_buffer *io_input();
-pipe_buffer *io_stream();
 void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)());
 void parameters_alloc_to_call(pipe_buffer *target, void *buffer, int size, void (*f)(void *));
 gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data);
+void io_input_start(FILE *source);
+void io_stream_start(FILE *source);
+void io_stop(pipe_buffer *target);
+gboolean io_exited();
 
 // event
 

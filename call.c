@@ -14,10 +14,11 @@ static void commandVersion() {
 
 // exit
 
-static void commandExit() {
-    pipe_unwatch();
-    commandVersion();
-    g_application_quit(G_APPLICATION(app));
+static void commandExit(pipe_buffer *target) {
+    io_stop(target);
+    if (io_exited()) {
+        g_application_quit(G_APPLICATION(app));
+    }
 }
 
 // clear command
@@ -410,7 +411,7 @@ void callcommand(char command, pipe_buffer *target) {
         commandTitle(target);
         break;
     case 'X':
-        commandExit();
+        commandExit(target);
         break;
     case 'V':
         commandVersion();
