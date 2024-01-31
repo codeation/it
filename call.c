@@ -28,17 +28,13 @@ _Static_assert(sizeof windowid == 2, "wrong windowid align");
 
 static void setClear() { elem_clear(windowid.id); }
 
-static void commandClear(pipe_buffer *target) {
-    parameters_to_call(target, &windowid, sizeof windowid, setClear);
-}
+static void commandClear(pipe_buffer *target) { parameters_to_call(target, &windowid, sizeof windowid, setClear); }
 
 // show command
 
 static void setShow() { window_redraw(windowid.id); }
 
-static void commandShow(pipe_buffer *target) {
-    parameters_to_call(target, &windowid, sizeof windowid, setShow);
-}
+static void commandShow(pipe_buffer *target) { parameters_to_call(target, &windowid, sizeof windowid, setShow); }
 
 // fill command
 
@@ -51,13 +47,10 @@ static struct {
 _Static_assert(sizeof fill == 18, "wrong fill align");
 
 static void setFill() {
-    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b,
-                  fill.a);
+    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b, fill.a);
 }
 
-static void commandFill(pipe_buffer *target) {
-    parameters_to_call(target, &fill, sizeof fill, setFill);
-}
+static void commandFill(pipe_buffer *target) { parameters_to_call(target, &fill, sizeof fill, setFill); }
 
 // draw line
 
@@ -70,13 +63,9 @@ static struct {
 
 _Static_assert(sizeof line == 18, "wrong line align");
 
-static void setLine() {
-    elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b, line.a);
-}
+static void setLine() { elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b, line.a); }
 
-static void commandLine(pipe_buffer *target) {
-    parameters_to_call(target, &line, sizeof line, setLine);
-}
+static void commandLine(pipe_buffer *target) { parameters_to_call(target, &line, sizeof line, setLine); }
 
 // draw string
 
@@ -90,14 +79,11 @@ static struct {
 _Static_assert(sizeof point == 16, "wrong point align");
 
 static void setText(void *text) {
-    elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b,
-                  point.a);
+    elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b, point.a);
     // free(text) in elem_text_destroy
 }
 
-void commandText(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &point, sizeof point, setText);
-}
+void commandText(pipe_buffer *target) { parameters_alloc_to_call(target, &point, sizeof point, setText); }
 
 // draw image
 
@@ -110,13 +96,9 @@ static struct {
 
 _Static_assert(sizeof image == 12, "wrong image align");
 
-static void setImage() {
-    elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid);
-}
+static void setImage() { elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid); }
 
-static void commandImage(pipe_buffer *target) {
-    parameters_to_call(target, &image, sizeof image, setImage);
-}
+static void commandImage(pipe_buffer *target) { parameters_to_call(target, &image, sizeof image, setImage); }
 
 // load image
 
@@ -144,9 +126,7 @@ _Static_assert(sizeof imageid == 2, "wrong imageid align");
 
 static void setImageRem() { image_rem(imageid.id); }
 
-static void commandImageRem(pipe_buffer *target) {
-    parameters_to_call(target, &imageid, sizeof imageid, setImageRem);
-}
+static void commandImageRem(pipe_buffer *target) { parameters_to_call(target, &imageid, sizeof imageid, setImageRem); }
 
 // load font
 
@@ -159,8 +139,7 @@ static struct {
 _Static_assert(sizeof font == 12, "wrong font align");
 
 static void setFont(void *family) {
-    font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight,
-                  font.stretch);
+    font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight, font.stretch);
     int16_t lineheight, baseline, ascent, descent;
     get_font_metrics(font.id, &lineheight, &baseline, &ascent, &descent);
     pipe_output_write(&lineheight, sizeof lineheight);
@@ -171,9 +150,7 @@ static void setFont(void *family) {
     free(family);
 }
 
-static void commandFont(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &font, sizeof font, setFont);
-}
+static void commandFont(pipe_buffer *target) { parameters_alloc_to_call(target, &font, sizeof font, setFont); }
 
 // remove font
 
@@ -183,9 +160,7 @@ _Static_assert(sizeof fontid == 2, "wrong fontid align");
 
 static void setFontRem() { font_elem_rem(fontid.id); }
 
-static void commandFontRem(pipe_buffer *target) {
-    parameters_to_call(target, &fontid, sizeof fontid, setFontRem);
-}
+static void commandFontRem(pipe_buffer *target) { parameters_to_call(target, &fontid, sizeof fontid, setFontRem); }
 
 // split text
 
@@ -212,9 +187,7 @@ static void splitText(void *text) {
     free(text);
 }
 
-static void commandSplit(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &split, sizeof split, splitText);
-}
+static void commandSplit(pipe_buffer *target) { parameters_alloc_to_call(target, &split, sizeof split, splitText); }
 
 // text rect
 
@@ -250,9 +223,7 @@ static void setSize() {
     // gtk_widget_show(top);
 }
 
-static void commandSize(pipe_buffer *target) {
-    parameters_to_call(target, &size, sizeof size, setSize);
-}
+static void commandSize(pipe_buffer *target) { parameters_to_call(target, &size, sizeof size, setSize); }
 
 // app window title
 
@@ -261,9 +232,7 @@ static void setTitle(void *title) {
     free(title);
 }
 
-static void commandTitle(pipe_buffer *target) {
-    parameters_alloc_to_call(target, NULL, 0, setTitle);
-}
+static void commandTitle(pipe_buffer *target) { parameters_alloc_to_call(target, NULL, 0, setTitle); }
 
 // layout
 
@@ -281,9 +250,7 @@ static void setLayout() {
     layout_size(layout.id, layout.x, layout.y, layout.width, layout.height);
 }
 
-static void commandLayout(pipe_buffer *target) {
-    parameters_to_call(target, &layout, sizeof layout, setLayout);
-}
+static void commandLayout(pipe_buffer *target) { parameters_to_call(target, &layout, sizeof layout, setLayout); }
 
 // layout drop
 
@@ -337,9 +304,7 @@ static void setWindow() {
     window_size(window.id, window.x, window.y, window.width, window.height);
 }
 
-static void commandWindow(pipe_buffer *target) {
-    parameters_to_call(target, &window, sizeof window, setWindow);
-}
+static void commandWindow(pipe_buffer *target) { parameters_to_call(target, &window, sizeof window, setWindow); }
 
 // window size
 
@@ -389,9 +354,7 @@ static void addMenu(void *label) {
     // free(label) is eternal
 }
 
-static void commandMenu(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &menu, sizeof menu, addMenu);
-}
+static void commandMenu(pipe_buffer *target) { parameters_alloc_to_call(target, &menu, sizeof menu, addMenu); }
 
 // menu item
 

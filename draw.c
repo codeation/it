@@ -182,8 +182,7 @@ static id_list *font_list = NULL;
 
 font_elem *get_font(int id) { return (font_elem *)id_list_get_data(font_list, id); }
 
-void font_elem_add(int id, int height, char *family, int style, int variant, int weight,
-                   int stretch) {
+void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     font_elem *e = malloc(sizeof(font_elem));
     e->height = height;
     e->desc = pango_font_description_new();
@@ -206,8 +205,7 @@ void font_elem_rem(int id) {
 
 static PangoContext *top_pango_context = NULL;
 
-void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent,
-                      int16_t *descent) {
+void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
     if (top_pango_context == NULL)
         top_pango_context = gtk_widget_get_pango_context(top);
     PangoLayout *layout = pango_layout_new(top_pango_context);
