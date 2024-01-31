@@ -51,6 +51,7 @@ static void write_configure_event() {
 gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
     static gint x = 0, y = 0, width = 0, height = 0;
     if (event->x == x && event->y == y && event->width == width && event->height == height) {
+        gtk_widget_queue_draw(top);
         return FALSE;
     }
     x = event->x;
