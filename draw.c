@@ -204,16 +204,6 @@ void font_elem_rem(int id) {
     free(e);
 }
 
-void font_elem_destroy() {
-    while (TRUE) {
-        font_elem *e = id_list_remove_any(font_list);
-        if (e == NULL)
-            break;
-        pango_font_description_free(e->desc);
-        free(e);
-    }
-}
-
 static PangoContext *top_pango_context = NULL;
 
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent,
