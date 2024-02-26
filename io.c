@@ -81,12 +81,13 @@ static void reset_buffer(pipe_buffer *target) {
 
 gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data) {
     pipe_buffer *target = data;
-    // read data into buffer
-    int len = read(g_io_channel_unix_get_fd(source), target->buffer, target->size);
-    if (len <= 0) {
-        perror("read error");
+    gsize len = 0;
+    GIOStatus status = g_io_channel_read_chars(source, target->buffer, (gsize)target->size, &len, NULL);
+    if (status != G_IO_STATUS_NORMAL) {
+        printf("read status: %d\n", status);
         exit(EXIT_FAILURE);
-    } else if (len < target->size) {
+    }
+    if (len < target->size) {
         // shift
         target->buffer += len;
         target->size -= len;
@@ -103,16 +104,24 @@ gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpointer da
     return TRUE;
 }
 
-static void io_start(FILE *source, pipe_buffer *target) {
+static void io_start(FILE *source, pipe_buffer *target, gboolean is_stream) {
     reset_buffer(target);
     GIOChannel *chan = g_io_channel_unix_new(fileno(source));
+    GIOStatus status = g_io_channel_set_encoding(chan, NULL, NULL);
+    if (status != G_IO_STATUS_NORMAL) {
+        printf("set encoding status: %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+    if (is_stream) {
+        g_io_channel_set_buffer_size(chan, 256 * 1024);
+    }
     target->in_id = g_io_add_watch(chan, G_IO_IN, async_read_chan, target);
     target->hup_id = g_io_add_watch(chan, G_IO_HUP, chan_error_func, target);
     g_io_channel_unref(chan);
 }
 
-void io_input_start(FILE *source) { io_start(source, &sync_chan); }
-void io_stream_start(FILE *source) { io_start(source, &stream_chan); }
+void io_input_start(FILE *source) { io_start(source, &sync_chan, FALSE); }
+void io_stream_start(FILE *source) { io_start(source, &stream_chan, TRUE); }
 
 void io_stop(pipe_buffer *target) {
     g_source_remove(target->hup_id);

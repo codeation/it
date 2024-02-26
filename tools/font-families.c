@@ -19,7 +19,11 @@ static void on_app_activate(GApplication *application, gpointer data) {
 }
 
 int main(int argc, char **argv) {
+#ifndef GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
     app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
+#else
+    app = gtk_application_new(NULL, G_APPLICATION_DEFAULT_FLAGS);
+#endif
     g_signal_connect(app, "activate", G_CALLBACK(on_app_activate), NULL);
     int status = g_application_run(G_APPLICATION(app), 1, argv);
     g_object_unref(app);

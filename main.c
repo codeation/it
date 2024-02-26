@@ -27,7 +27,11 @@ static void on_app_activate(GApplication *application, gpointer data) {
     pipe_init(pipe_suffix, async_read_chan);
 }
 
-static void on_app_shutdown(GApplication *application, gpointer data) { pipe_done(); }
+static void on_app_shutdown(GApplication *application, gpointer data) {
+    pipe_done();
+    gtk_widget_destroy(top);
+    g_application_quit(G_APPLICATION(app));
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -35,7 +39,11 @@ int main(int argc, char **argv) {
         return 1;
     }
     pipe_suffix = argv[1];
+#ifndef GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
     app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
+#else
+    app = gtk_application_new(NULL, G_APPLICATION_DEFAULT_FLAGS);
+#endif
     g_set_application_name("Impress");
     g_signal_connect(app, "activate", G_CALLBACK(on_app_activate), NULL);
     g_signal_connect(app, "shutdown", G_CALLBACK(on_app_shutdown), NULL);
