@@ -29,13 +29,27 @@ typedef struct {
     uint16_t inner_width, inner_height;
 } configure_event;
 
+static void write_configure_event_once(configure_event *e) {
+    static gint width = 0, height = 0, inner_width = 0, inner_height = 0;
+    if (e->width == width && e->height == height && e->inner_width == inner_width && e->inner_height == inner_height) {
+        return;
+    }
+    width = e->width;
+    height = e->height;
+    inner_width = e->inner_width;
+    inner_height = e->inner_height;
+    char command_type = 'f';
+    pipe_event_write(&command_type, sizeof command_type);
+    pipe_event_write(e, sizeof *e);
+    pipe_event_flush();
+}
+
 static void write_configure_event() {
     static GtkWidget *layout = NULL;
     if (layout == NULL) {
         layout = layout_get_widget(1);
     }
     gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
-    char command_type = 'f';
     configure_event e;
     gint w, h;
     gtk_window_get_size(GTK_WINDOW(top), &w, &h);
@@ -43,21 +57,10 @@ static void write_configure_event() {
     e.height = h;
     e.inner_width = gtk_widget_get_allocated_width(layout);
     e.inner_height = gtk_widget_get_allocated_height(layout);
-    pipe_event_write(&command_type, sizeof command_type);
-    pipe_event_write(&e, sizeof e);
-    pipe_event_flush();
+    write_configure_event_once(&e);
 }
 
 gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
-    static gint x = 0, y = 0, width = 0, height = 0;
-    if (event->x == x && event->y == y && event->width == width && event->height == height) {
-        gtk_widget_queue_draw(top);
-        return FALSE;
-    }
-    x = event->x;
-    y = event->y;
-    width = event->width;
-    height = event->height;
     write_configure_event();
     return FALSE;
 }
