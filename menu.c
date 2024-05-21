@@ -57,10 +57,9 @@ void menu_item_add(int id, int parent, char *label, char *action) {
     m->action = action;
     id_list_append(menu_item_list, id, m);
     menu_elem *p = (menu_elem *)id_list_get_data(menu_list, parent);
+    g_menu_append_item(G_MENU(p->menu), m->item);
+    g_object_unref(m->item);
     GSimpleAction *sa = g_simple_action_new(action + 4, NULL);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(sa));
     g_signal_connect(G_OBJECT(sa), "activate", G_CALLBACK(menu_item_click), m);
-    GMenuItem *item = g_menu_item_new(label, action);
-    g_menu_append_item(G_MENU(p->menu), item);
-    g_object_unref(item);
 }

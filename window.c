@@ -57,6 +57,7 @@ void window_raise(int id) {
     g_object_ref(w->draw);
     gtk_container_remove(GTK_CONTAINER(w->layout), w->draw);
     gtk_container_add(GTK_CONTAINER(w->layout), w->draw);
+    g_object_unref(w->draw);
     if (GTK_IS_LAYOUT(w->layout))
         gtk_layout_move(GTK_LAYOUT(w->layout), w->draw, w->x, w->y);
     else

@@ -65,6 +65,7 @@ void layout_raise(int id) {
         g_object_ref(l->layout);
         gtk_container_remove(GTK_CONTAINER(l->parent), l->layout);
         gtk_container_add(GTK_CONTAINER(l->parent), l->layout);
+        g_object_unref(l->layout);
         if (GTK_IS_LAYOUT(l->parent))
             gtk_layout_move(GTK_LAYOUT(l->parent), l->layout, l->x, l->y);
         else
