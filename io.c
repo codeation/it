@@ -113,7 +113,7 @@ static void io_start(FILE *source, pipe_buffer *target, gboolean is_stream) {
         exit(EXIT_FAILURE);
     }
     if (is_stream) {
-        g_io_channel_set_buffer_size(chan, 256 * 1024);
+        g_io_channel_set_buffer_size(chan, 64 * 1024);
     }
     target->in_id = g_io_add_watch(chan, G_IO_IN, async_read_chan, target);
     target->hup_id = g_io_add_watch(chan, G_IO_HUP, chan_error_func, target);
