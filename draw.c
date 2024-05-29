@@ -13,11 +13,9 @@
 
 // draw elements
 
-void *draw_data_new() { return id_list_new(); }
-
-void draw_data_free(void *v) { id_list_free(v); }
-
-void draw_elem_add(id_list *list, void *data) { id_list_append(list, 0, data); }
+inline void *draw_data_new() { return id_list_new(); }
+inline void draw_data_free(void *v) { id_list_free(v); }
+inline void draw_elem_add(id_list *list, void *data) { id_list_append(list, 0, data); }
 
 // general
 
@@ -29,7 +27,7 @@ typedef struct {
 
 typedef struct {
     int type;
-    int x, y, width, height;
+    double x, y, width, height;
     double r, g, b, a;
 } elem_fill;
 
@@ -39,7 +37,7 @@ void elem_fill_draw(cairo_t *cr, elem_fill *e) {
     cairo_fill(cr);
 }
 
-void elem_fill_destroy(elem_fill *e) {}
+inline void elem_fill_destroy(elem_fill *e) {}
 
 void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a) {
     elem_fill *e = malloc(sizeof(elem_fill));
@@ -59,27 +57,19 @@ void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, in
 
 typedef struct {
     int type;
-    int x0, y0, x1, y1;
+    double x0, y0, x1, y1;
     double r, g, b, a;
 } elem_line;
 
 void elem_line_draw(cairo_t *cr, elem_line *e) {
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_set_line_width(cr, 1);
-    if (e->x0 == e->x1) {
-        cairo_move_to(cr, e->x0 + 0.5, e->y0);
-        cairo_line_to(cr, e->x1 + 0.5, e->y1);
-    } else if (e->y0 == e->y1) {
-        cairo_move_to(cr, e->x0, e->y0 + 0.5);
-        cairo_line_to(cr, e->x1, e->y1 + 0.5);
-    } else {
-        cairo_move_to(cr, e->x0, e->y0);
-        cairo_line_to(cr, e->x1, e->y1);
-    }
+    cairo_move_to(cr, e->x0, e->y0);
+    cairo_line_to(cr, e->x1, e->y1);
     cairo_stroke(cr);
 }
 
-void elem_line_destroy(elem_line *e) {}
+inline void elem_line_destroy(elem_line *e) {}
 
 void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a) {
     elem_line *e = malloc(sizeof(elem_line));
@@ -88,6 +78,13 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, 
     e->y0 = y0;
     e->x1 = x1;
     e->y1 = y1;
+    if (x0 == x1) {
+        e->x0 += 0.5;
+        e->x1 += 0.5;
+    } else if (y0 == y1) {
+        e->y0 += 0.5;
+        e->y1 += 0.5;
+    }
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;
@@ -95,21 +92,21 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, 
     draw_elem_add(window_get_data(id), e);
 }
 
-// image cache
+// bitmap cache
 
-typedef struct _image_elem image_elem;
+typedef struct _bitmap_elem bitmap_elem;
 
-struct _image_elem {
+struct _bitmap_elem {
     unsigned char *data;
-    int width, height;
-    cairo_surface_t *image;
+    double width, height;
+    cairo_surface_t *bitmap;
 };
 
-static id_list *image_list = NULL;
+static id_list *bitmap_list = NULL;
 
-image_elem *get_image(int id) { return (image_elem *)id_list_get_data(image_list, id); }
+inline static bitmap_elem *get_bitmap(int id) { return (bitmap_elem *)id_list_get_data(bitmap_list, id); }
 
-void image_add(int id, int width, int height, unsigned char *data) {
+void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
     int stride = cairo_format_stride_for_width(cairo_format, width);
     for (int i = 0; i < height; i++) {
@@ -121,19 +118,19 @@ void image_add(int id, int width, int height, unsigned char *data) {
             p += 4;
         }
     }
-    image_elem *e = malloc(sizeof(image_elem));
+    bitmap_elem *e = malloc(sizeof(bitmap_elem));
     e->data = data;
     e->width = width;
     e->height = height;
-    e->image = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
-    if (image_list == NULL)
-        image_list = id_list_new();
-    id_list_append(image_list, id, e);
+    e->bitmap = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
+    if (bitmap_list == NULL)
+        bitmap_list = id_list_new();
+    id_list_append(bitmap_list, id, e);
 }
 
-void image_rem(int id) {
-    image_elem *e = id_list_remove(image_list, id);
-    cairo_surface_destroy(e->image);
+void bitmap_rem(int id) {
+    bitmap_elem *e = id_list_remove(bitmap_list, id);
+    cairo_surface_destroy(e->bitmap);
     free(e->data);
     free(e);
 }
@@ -142,30 +139,28 @@ void image_rem(int id) {
 
 typedef struct {
     int type;
-    int x, y;
-    int width, height;
-    int imageid;
+    double x, y;
+    double scale_x, scale_y;
+    bitmap_elem *be;
 } elem_image;
 
 void elem_image_draw(cairo_t *cr, elem_image *e) {
-    image_elem *ie = get_image(e->imageid);
-    double scale_x = (double)(ie->width) / (double)(e->width);
-    double scale_y = (double)(ie->height) / (double)(e->height);
-    cairo_surface_set_device_scale(ie->image, scale_x, scale_y);
-    cairo_set_source_surface(cr, ie->image, e->x, e->y);
+    cairo_surface_set_device_scale(e->be->bitmap, e->scale_x, e->scale_y);
+    cairo_set_source_surface(cr, e->be->bitmap, e->x, e->y);
     cairo_paint(cr);
 }
 
-void elem_image_destroy(elem_image *e) {}
+inline void elem_image_destroy(elem_image *e) {}
 
 void elem_image_add(int id, int x, int y, int width, int height, int imageid) {
     elem_image *e = malloc(sizeof(elem_image));
+    bitmap_elem *ie = get_bitmap(imageid);
     e->type = DRAW_ELEM_IMAGE;
     e->x = x;
     e->y = y;
-    e->width = width;
-    e->height = height;
-    e->imageid = imageid;
+    e->scale_x = ie->width / (double)width;
+    e->scale_y = ie->height / (double)height;
+    e->be = ie;
     draw_elem_add(window_get_data(id), e);
 }
 
@@ -180,7 +175,7 @@ struct _font_elem {
 
 static id_list *font_list = NULL;
 
-font_elem *get_font(int id) { return (font_elem *)id_list_get_data(font_list, id); }
+inline static font_elem *get_font(int id) { return (font_elem *)id_list_get_data(font_list, id); }
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     font_elem *e = malloc(sizeof(font_elem));
@@ -262,9 +257,9 @@ void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
 
 typedef struct {
     int type;
-    int x, y;
+    double x, y;
     char *text;
-    int fontid;
+    font_elem *fe;
     double r, g, b, a;
     PangoLayout *layout;
 } elem_text;
@@ -272,7 +267,7 @@ typedef struct {
 void elem_text_draw(cairo_t *cr, elem_text *e) {
     if (e->layout == NULL) {
         e->layout = pango_cairo_create_layout(cr);
-        pango_layout_set_font_description(e->layout, get_font(e->fontid)->desc);
+        pango_layout_set_font_description(e->layout, e->fe->desc);
         pango_layout_set_text(e->layout, e->text, -1);
     }
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
@@ -292,7 +287,7 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->x = x;
     e->y = y;
     e->text = text;
-    e->fontid = fontid;
+    e->fe = get_font(fontid);
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;

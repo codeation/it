@@ -2,19 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct _id_list_elem {
-    int id;
-    void *data;
-    id_list_elem *next;
-};
-
-struct _id_list {
-    id_list_elem *root;
-    id_list_elem *tail;
-    int cache_id;
-    id_list_elem *cache_elem;
-};
-
 id_list *id_list_new() {
     id_list *list = malloc(sizeof(id_list));
     list->root = NULL;
@@ -94,9 +81,3 @@ void *id_list_remove_any(id_list *list) {
     free(e);
     return data;
 }
-
-id_list_elem *id_list_root(id_list *list) { return list->root; }
-
-id_list_elem *id_list_elem_next(id_list_elem *elem) { return elem->next; }
-
-void *id_list_elem_data(id_list_elem *elem) { return elem->data; }

@@ -111,7 +111,7 @@ static struct {
 _Static_assert(sizeof imageAdd == 6, "wrong imageAdd align");
 
 static void setImageAdd(void *data) {
-    image_add(imageAdd.id, imageAdd.width, imageAdd.height, data);
+    bitmap_add(imageAdd.id, imageAdd.width, imageAdd.height, data);
     // free(data) in image_rem
 }
 
@@ -125,7 +125,7 @@ static struct { int16_t id; } imageid;
 
 _Static_assert(sizeof imageid == 2, "wrong imageid align");
 
-static void setImageRem() { image_rem(imageid.id); }
+static void setImageRem() { bitmap_rem(imageid.id); }
 
 static void commandImageRem(pipe_buffer *target) { parameters_to_call(target, &imageid, sizeof imageid, setImageRem); }
 

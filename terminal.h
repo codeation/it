@@ -71,10 +71,10 @@ void window_redraw(int id);
 
 void *window_get_data(int id);
 
-// image
+// bitmap
 
-void image_add(int id, int width, int height, unsigned char *data);
-void image_rem(int id);
+void bitmap_add(int id, int width, int height, unsigned char *data);
+void bitmap_rem(int id);
 
 // font
 
