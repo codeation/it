@@ -44,34 +44,17 @@ static void write_configure_event_once(configure_event *e) {
     pipe_event_flush();
 }
 
-static void write_configure_event() {
-    static GtkWidget *layout = NULL;
-    if (layout == NULL) {
-        layout = layout_get_widget(1);
-    }
-    gtk_widget_translate_coordinates(layout, top, 0, 0, &layoutOffsetX, &layoutOffsetY);
-    configure_event e;
-    gint w, h;
-    gtk_window_get_size(GTK_WINDOW(top), &w, &h);
-    e.width = w;
-    e.height = h;
-    e.inner_width = gtk_widget_get_allocated_width(layout);
-    e.inner_height = gtk_widget_get_allocated_height(layout);
-    write_configure_event_once(&e);
-}
-
-gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED) {
-    write_configure_event();
-    return FALSE;
-}
-
 void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) {
-    static gboolean done = FALSE;
-    if (done) {
-        return;
-    }
-    done = TRUE;
-    write_configure_event();
+    layoutOffsetX = allocation->x;
+    layoutOffsetY = allocation->y;
+    gint width, height;
+    gtk_window_get_size(GTK_WINDOW(top), &width, &height);
+    configure_event e;
+    e.width = width;
+    e.height = height;
+    e.inner_width = allocation->width;
+    e.inner_height = allocation->height;
+    write_configure_event_once(&e);
 }
 
 // Keyboard events

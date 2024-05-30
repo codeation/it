@@ -35,7 +35,6 @@ void layout_create(int id, int parent_id) {
     id_list_append(layout_list, id, l);
     if (id == 1) {
         gtk_widget_show_all(top);
-        g_signal_connect(top, "configure-event", G_CALLBACK(on_configure), NULL);
         g_signal_connect(l->layout, "size-allocate", G_CALLBACK(on_size_allocate), NULL);
     }
 }

@@ -38,7 +38,6 @@ gboolean io_exited();
 // event
 
 gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED);
-gboolean on_configure(GtkWindow *window, GdkEventConfigure *event, gpointer data G_GNUC_UNUSED);
 void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data);
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
