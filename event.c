@@ -14,7 +14,7 @@ typedef struct {
 
 #define GENERAL_EVENT_DESTROY 1
 
-gboolean on_delete(GtkWidget *widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED) {
+gboolean on_delete(GtkWidget *widget, GdkEvent *event, gpointer data) {
     char command_type = 'g';
     general_event e;
     e.id = GENERAL_EVENT_DESTROY;
