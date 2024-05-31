@@ -12,6 +12,8 @@ typedef struct {
     uint32_t id;
 } general_event;
 
+_Static_assert(sizeof(general_event) == 4, "wrong general_event align");
+
 #define GENERAL_EVENT_DESTROY 1
 
 gboolean on_delete(GtkWidget *widget, GdkEvent *event, gpointer data) {
@@ -28,6 +30,8 @@ typedef struct {
     uint16_t width, height;
     uint16_t inner_width, inner_height;
 } configure_event;
+
+_Static_assert(sizeof(configure_event) == 8, "wrong configure_event align");
 
 static void write_configure_event_once(configure_event *e) {
     static gint width = 0, height = 0, inner_width = 0, inner_height = 0;
@@ -67,6 +71,8 @@ typedef struct {
     uint8_t meta;
 } keyboard_event;
 
+_Static_assert(sizeof(keyboard_event) == 8, "wrong keyboard_event align");
+
 gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     char command_type = 'k';
     keyboard_event e;
@@ -90,6 +96,8 @@ typedef struct {
     uint8_t button;
     uint16_t x, y;
 } button_event;
+
+_Static_assert(sizeof(button_event) == 6, "wrong button_event align");
 
 gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     static guint32 prev_time = 0;
@@ -117,6 +125,8 @@ typedef struct {
     uint8_t meta;
 } motion_event;
 
+_Static_assert(sizeof(motion_event) == 8, "wrong motion_event align");
+
 gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     static guint32 prev_time = 0;
     if (event->time == prev_time) {
@@ -141,6 +151,8 @@ typedef struct {
     int16_t direction;
     int16_t delta_x, delta_y;
 } scroll_event;
+
+_Static_assert(sizeof(scroll_event) == 6, "wrong scroll_event align");
 
 gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
     char command_type = 's';
@@ -168,6 +180,8 @@ void s_menu_action(char *name) {
 typedef struct {
     int16_t format;
 } clipboard_event;
+
+_Static_assert(sizeof(clipboard_event) == 2, "wrong clipboard_event align");
 
 void s_text_received(GtkClipboard *clipboard, const gchar *text, gpointer data) {
     if (text == NULL) {
