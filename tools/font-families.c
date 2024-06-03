@@ -11,7 +11,19 @@ static void on_app_activate(GApplication *application, gpointer data) {
     int family_length;
     pango_context_list_families(context, &families, &family_length);
     for (int i = 0; i < family_length; i++) {
-        printf("family: %s\n", pango_font_family_get_name(families[i]));
+        PangoFontFace **faces;
+        int face_length;
+        pango_font_family_list_faces(families[i], &faces, &face_length);
+
+        printf("%s [", pango_font_family_get_name(families[i]));
+        for (int j = 0; j < face_length; j++) {
+            if (j != 0)
+                printf(", ");
+            printf("%s", pango_font_face_get_face_name(faces[j]));
+        }
+        printf("]\n");
+
+        g_free(faces);
     }
     g_free(families);
 
