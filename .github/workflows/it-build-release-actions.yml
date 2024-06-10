@@ -29,15 +29,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-latest]
+        os: [ubuntu-latest, ubuntu-20.04, macos-13, macos-latest]
         include:
           - os: ubuntu-latest
             target: linux
           - os: ubuntu-20.04
             target: ubuntu.20.04
-          - os: macos-latest
+          - os: macos-13
             target: darwin
-          - os: macos-14
+          - os: macos-latest
             target: darwin.m1
     steps:
       - uses: actions/checkout@v4
