@@ -4,7 +4,7 @@ LDFLAGS=$(shell pkg-config --libs gtk+-3.0)
 font-families: font-families.o
 	gcc -o font-families font-families.o $(LDFLAGS) -lm
 
-%.o: %.c terminal.h idlist.h
+%.o: %.c
 	gcc -c $(CFLAGS) $<
 
 clean:

@@ -2,7 +2,6 @@
 #define _terminal_h_
 
 #include <gtk/gtk.h>
-#include <stdint.h>
 
 // main
 
@@ -26,7 +25,7 @@ void pipe_event_flush();
 
 // io
 
-typedef struct pipe_buffer pipe_buffer;
+typedef struct _pipe_buffer pipe_buffer;
 void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)());
 void parameters_alloc_to_call(pipe_buffer *target, void *buffer, int size, void (*f)(void *));
 gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data);
@@ -67,8 +66,9 @@ void window_destroy(int id);
 void window_raise(int id);
 void window_size(int id, int x, int y, int width, int height);
 void window_redraw(int id);
+void window_clear(int id);
 
-void *window_get_data(int id);
+void window_add_draw(int id, void *data);
 
 // bitmap
 
@@ -85,15 +85,12 @@ void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height);
 
 // draw
 
-void *draw_data_new();
-void draw_data_free(void *v);
-void draw_destroy(void *v);
-
-void elem_clear(int id);
 void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a);
 void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 void elem_image_add(int id, int x, int y, int width, int height, int imageid);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a);
+
+void elem_draw_destroy(void *data);
 
 // menu
 

@@ -1,8 +1,6 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 #include <math.h>
-#include <stdint.h>
-#include <string.h>
 
 static int layoutOffsetX = 0, layoutOffsetY = 0;
 

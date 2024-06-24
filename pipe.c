@@ -1,10 +1,5 @@
 #include "terminal.h"
-#include <fcntl.h>
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #define FIFO_STREAM_PATH "/tmp/it_fifo_stream_"
 #define FIFO_INPUT_PATH "/tmp/it_fifo_input_"

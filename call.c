@@ -1,9 +1,5 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 // driver version
 
@@ -27,7 +23,7 @@ static struct { int16_t id; } windowid;
 
 _Static_assert(sizeof windowid == 2, "wrong windowid align");
 
-static void setClear() { elem_clear(windowid.id); }
+static void setClear() { window_clear(windowid.id); }
 
 static void commandClear(pipe_buffer *target) { parameters_to_call(target, &windowid, sizeof windowid, setClear); }
 
@@ -81,7 +77,7 @@ _Static_assert(sizeof point == 16, "wrong point align");
 
 static void setText(void *text) {
     elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b, point.a);
-    // free(text) in elem_text_destroy
+    // g_free(text) in elem_text_destroy
 }
 
 void commandText(pipe_buffer *target) { parameters_alloc_to_call(target, &point, sizeof point, setText); }
@@ -112,7 +108,7 @@ _Static_assert(sizeof imageAdd == 6, "wrong imageAdd align");
 
 static void setImageAdd(void *data) {
     bitmap_add(imageAdd.id, imageAdd.width, imageAdd.height, data);
-    // free(data) in image_rem
+    // g_free(data) in image_rem
 }
 
 static void commandImageAdd(pipe_buffer *target) {
@@ -148,7 +144,7 @@ static void setFont(void *family) {
     pipe_output_write(&ascent, sizeof ascent);
     pipe_output_write(&descent, sizeof descent);
     pipe_output_flush();
-    free(family);
+    g_free(family);
 }
 
 static void commandFont(pipe_buffer *target) { parameters_alloc_to_call(target, &font, sizeof font, setFont); }
@@ -183,9 +179,9 @@ static void splitText(void *text) {
         int length = (1 + *out) * sizeof(int16_t);
         pipe_output_write(out, length);
         pipe_output_flush();
-        free(out);
+        g_free(out);
     }
-    free(text);
+    g_free(text);
 }
 
 static void commandSplit(pipe_buffer *target) { parameters_alloc_to_call(target, &split, sizeof split, splitText); }
@@ -200,7 +196,7 @@ static void rectText(void *text) {
     pipe_output_write(&width, sizeof width);
     pipe_output_write(&height, sizeof width);
     pipe_output_flush();
-    free(text);
+    g_free(text);
 }
 
 _Static_assert(sizeof textrect == 2, "wrong textrect align");
@@ -230,7 +226,7 @@ static void commandSize(pipe_buffer *target) { parameters_to_call(target, &size,
 
 static void setTitle(void *title) {
     gtk_window_set_title(GTK_WINDOW(top), title);
-    free(title);
+    g_free(title);
 }
 
 static void commandTitle(pipe_buffer *target) { parameters_alloc_to_call(target, NULL, 0, setTitle); }
@@ -352,7 +348,7 @@ _Static_assert(sizeof menu == 4, "wrong menu align");
 
 static void addMenu(void *label) {
     menu_node_add(menu.id, menu.parent, label);
-    // free(label) is eternal
+    // g_free(label) is eternal
 }
 
 static void commandMenu(pipe_buffer *target) { parameters_alloc_to_call(target, &menu, sizeof menu, addMenu); }
@@ -364,8 +360,8 @@ static pipe_buffer *menu_target = NULL;
 
 static void addMenuItem(void *action) {
     menu_item_add(menu.id, menu.parent, menuItemLabel, action);
-    // free(action) is eternal
-    // free(menuItemLabel) is eternal
+    // g_free(action) is eternal
+    // g_free(menuItemLabel) is eternal
 }
 
 static void setMenuItem(void *label) {
@@ -392,7 +388,7 @@ static void commandClipboardGet(pipe_buffer *target) {
 
 static void clipboardPut(void *data) {
     set_clipboard(clipboardtypeid.id, data);
-    free(data);
+    g_free(data);
 }
 
 static void commandClipboardPut(pipe_buffer *target) {

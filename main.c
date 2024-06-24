@@ -1,7 +1,5 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 GtkApplication *app = NULL;
 GtkWidget *top = NULL;

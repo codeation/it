@@ -1,10 +1,7 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-typedef struct pipe_buffer {
+typedef struct _pipe_buffer {
     char *buffer;
     int size;
     void (*next_func)(pipe_buffer *target);
@@ -36,11 +33,11 @@ void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)()
 static void call_last_func(pipe_buffer *target) {
     reset_buffer(target);
     target->last_func(target->data); // func must free the data after all
-    // free(target->data);
+    // g_free(target->data);
 }
 
 static void read_alloc_data(pipe_buffer *target) {
-    target->data = malloc(target->alloc_length + 1);
+    target->data = g_malloc(target->alloc_length + 1);
     target->data[target->alloc_length] = 0;
     if (target->alloc_length == 0) {
         call_last_func(target);

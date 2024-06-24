@@ -1,9 +1,9 @@
 #include "idlist.h"
+#include <glib.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 id_list *id_list_new() {
-    id_list *list = malloc(sizeof(id_list));
+    id_list *list = g_malloc(sizeof(id_list));
     list->root = NULL;
     list->tail = NULL;
     list->cache_id = -1;
@@ -11,10 +11,10 @@ id_list *id_list_new() {
     return list;
 }
 
-void id_list_free(id_list *list) { free(list); }
+void id_list_free(id_list *list) { g_free(list); }
 
 void id_list_append(id_list *list, int id, void *data) {
-    id_list_elem *e = malloc(sizeof(id_list_elem));
+    id_list_elem *e = g_malloc(sizeof(id_list_elem));
     e->id = id;
     e->data = data;
     e->next = NULL;
@@ -55,7 +55,7 @@ void *id_list_remove(id_list *list, int id) {
                 prev->next = e->next;
             if (e->next == NULL)
                 list->tail = prev;
-            free(e);
+            g_free(e);
             break;
         }
         prev = e;
@@ -67,17 +67,16 @@ void *id_list_remove(id_list *list, int id) {
     return data;
 }
 
-void *id_list_remove_any(id_list *list) {
+void id_list_remove_all(id_list *list, void (*elem_destroy_func)(void *data)) {
     list->cache_id = -1;
     list->cache_elem = NULL;
-    if (list->root == NULL) {
-        return NULL;
-    }
-    void *data = list->root->data;
     id_list_elem *e = list->root;
-    list->root = e->next;
-    if (e->next == NULL)
-        list->tail = NULL;
-    free(e);
-    return data;
+    while (e != NULL) {
+        id_list_elem *next = e->next;
+        elem_destroy_func(e->data);
+        g_free(e);
+        e = next;
+    }
+    list->root = NULL;
+    list->tail = NULL;
 }
