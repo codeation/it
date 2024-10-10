@@ -1,1 +1,1 @@
-char *it_version = "0.4.6";
+char *it_version = "0.5.0";
