@@ -23,7 +23,7 @@ static FILE *pipe_open(char *name, char *suffix, char *filemode) {
     return handle;
 }
 
-void pipe_init(char *pipe_suffix, GIOFunc func) {
+void pipe_init(char *pipe_suffix) {
     handle_output = pipe_open(FIFO_OUTPUT_PATH, pipe_suffix, "w");
     handle_event = pipe_open(FIFO_EVENT_PATH, pipe_suffix, "w");
     handle_input = pipe_open(FIFO_INPUT_PATH, pipe_suffix, "r");

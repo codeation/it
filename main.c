@@ -22,7 +22,7 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_signal_connect(top, "motion_notify_event", G_CALLBACK(s_motion), NULL);
     g_signal_connect(top, "scroll-event", G_CALLBACK(s_scroll), NULL);
 
-    pipe_init(pipe_suffix, async_read_chan);
+    pipe_init(pipe_suffix);
 }
 
 static void on_app_shutdown(GApplication *application, gpointer data) {
@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     pipe_suffix = argv[1];
+
 #ifndef GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
     app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 #else
