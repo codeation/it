@@ -104,7 +104,12 @@ gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpointer da
 static void io_start(FILE *source, pipe_buffer *target, gboolean is_stream) {
     reset_buffer(target);
     GIOChannel *chan = g_io_channel_unix_new(fileno(source));
-    GIOStatus status = g_io_channel_set_encoding(chan, NULL, NULL);
+    GIOStatus status = g_io_channel_set_flags(chan, G_IO_FLAG_NONBLOCK, NULL);
+    if (status != G_IO_STATUS_NORMAL) {
+        printf("set flag status: %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+    status = g_io_channel_set_encoding(chan, NULL, NULL);
     if (status != G_IO_STATUS_NORMAL) {
         printf("set encoding status: %d\n", status);
         exit(EXIT_FAILURE);

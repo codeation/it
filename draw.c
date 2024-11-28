@@ -92,14 +92,18 @@ static id_list *bitmap_list = NULL;
 void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
     int stride = cairo_format_stride_for_width(cairo_format, width);
+    unsigned char *row = data;
     for (int i = 0; i < height; i++) {
-        unsigned char *p = data + i * stride;
+        unsigned char *p0 = row;
+        unsigned char *p2 = p0 + 2;
         for (int j = 0; j < width; j++) {
-            unsigned char r = p[0];
-            p[0] = p[2];
-            p[2] = r;
-            p += 4;
+            unsigned char r = *p0;
+            *p0 = *p2;
+            *p2 = r;
+            p0 += 4;
+            p2 += 4;
         }
+        row += stride;
     }
     bitmap_elem *e = g_malloc(sizeof(bitmap_elem));
     e->data = data;
