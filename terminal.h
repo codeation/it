@@ -5,7 +5,7 @@
 
 // main
 
-extern char *it_version;
+extern char *it_api_version;
 
 extern GtkApplication *app;
 extern GtkWidget *top;

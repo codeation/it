@@ -4,7 +4,7 @@
 // driver version
 
 static void commandVersion() {
-    pipe_output_write_string(it_version);
+    pipe_output_write_string(it_api_version);
     pipe_output_flush();
 }
 
