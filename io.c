@@ -3,7 +3,7 @@
 
 typedef struct _pipe_buffer {
     char *buffer;
-    int size;
+    gsize size;
     void (*next_func)(pipe_buffer *target);
     char command;
     void (*call_func)();

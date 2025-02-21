@@ -154,11 +154,17 @@ void elem_image_add(int id, int x, int y, int width, int height, int imageid) {
 typedef struct {
     int height;
     PangoFontDescription *desc;
+    PangoLayout *layout;
+    PangoLayout *split_layout;
 } font_elem;
 
 static id_list *font_list = NULL;
 
+static PangoContext *top_pango_context = NULL;
+
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
+    if (top_pango_context == NULL)
+        top_pango_context = gtk_widget_get_pango_context(top);
     font_elem *e = g_malloc(sizeof(font_elem));
     e->height = height;
     e->desc = pango_font_description_new();
@@ -168,6 +174,11 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     pango_font_description_set_variant(e->desc, variant);
     pango_font_description_set_weight(e->desc, weight);
     pango_font_description_set_stretch(e->desc, stretch);
+    e->layout = pango_layout_new(top_pango_context);
+    pango_layout_set_font_description(e->layout, e->desc);
+    e->split_layout = pango_layout_new(top_pango_context);
+    pango_layout_set_font_description(e->split_layout, e->desc);
+    pango_layout_set_wrap(e->split_layout, PANGO_WRAP_WORD_CHAR);
     if (font_list == NULL)
         font_list = id_list_new();
     id_list_append(font_list, id, e);
@@ -175,65 +186,52 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
 
 void font_elem_rem(int id) {
     font_elem *e = id_list_remove(font_list, id);
+    g_object_unref(e->split_layout);
+    g_object_unref(e->layout);
     pango_font_description_free(e->desc);
     g_free(e);
 }
 
-static PangoContext *top_pango_context = NULL;
-
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
-    if (top_pango_context == NULL)
-        top_pango_context = gtk_widget_get_pango_context(top);
     font_elem *f = id_list_get_data(font_list, fontid);
-    PangoLayout *layout = pango_layout_new(top_pango_context);
-    pango_layout_set_font_description(layout, f->desc);
-    *baseline = (int16_t)rint((double)pango_layout_get_baseline(layout) / PANGO_SCALE);
-    PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(layout), f->desc, NULL);
+    *baseline = (int16_t)rint((double)pango_layout_get_baseline(f->layout) / PANGO_SCALE);
+    PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(f->layout), f->desc, NULL);
     *lineheight = (int16_t)rint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
     *ascent = (int16_t)rint((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
     *descent = (int16_t)rint((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
     pango_font_metrics_unref(metrics);
-    g_object_unref(layout);
 }
 
 // text split
 
 int16_t *font_split_text(int fontid, char *text, int edge, int indent) {
-    if (top_pango_context == NULL)
-        top_pango_context = gtk_widget_get_pango_context(top);
     font_elem *f = id_list_get_data(font_list, fontid);
-    PangoLayout *layout = pango_layout_new(top_pango_context);
-    pango_layout_set_font_description(layout, f->desc);
-    pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
-    pango_layout_set_width(layout, PANGO_SCALE * edge);
-    pango_layout_set_indent(layout, PANGO_SCALE * indent);
-    pango_layout_set_text(layout, text, -1);
-    int length = pango_layout_get_line_count(layout);
+    pango_layout_set_width(f->split_layout, PANGO_SCALE * edge);
+    pango_layout_set_indent(f->split_layout, PANGO_SCALE * indent);
+    pango_layout_set_text(f->split_layout, text, -1);
+    GSList *top = pango_layout_get_lines_readonly(f->split_layout);
+    int length = 0;
+    for (GSList *e = top; e != NULL; e = e->next)
+        length++;
     int16_t *out = g_malloc(sizeof(int16_t) * (length + 1));
     int16_t *pos = out;
     *pos++ = length;
-    for (GSList *e = pango_layout_get_lines_readonly(layout); e != NULL; e = e->next) {
+    for (GSList *e = top; e != NULL; e = e->next) {
         PangoLayoutLine *line = e->data;
         *pos++ = (int16_t)(line->length);
     }
-    g_object_unref(layout);
     return out;
 }
 
 // text rect
 
 void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
-    if (top_pango_context == NULL)
-        top_pango_context = gtk_widget_get_pango_context(top);
     font_elem *f = id_list_get_data(font_list, fontid);
-    PangoLayout *layout = pango_layout_new(top_pango_context);
-    pango_layout_set_font_description(layout, f->desc);
-    pango_layout_set_text(layout, text, -1);
+    pango_layout_set_text(f->layout, text, -1);
     int w, h;
-    pango_layout_get_pixel_size(layout, &w, &h);
+    pango_layout_get_pixel_size(f->layout, &w, &h);
     *width = (int16_t)w;
     *height = (int16_t)h;
-    g_object_unref(layout);
 }
 
 // text
@@ -242,27 +240,18 @@ typedef struct {
     int type;
     double x, y;
     char *text;
-    PangoFontDescription *desc;
-    double r, g, b, a;
     PangoLayout *layout;
+    double r, g, b, a;
 } text_elem;
 
 void elem_text_draw(cairo_t *cr, text_elem *e) {
-    if (e->layout == NULL) {
-        e->layout = pango_cairo_create_layout(cr);
-        pango_layout_set_font_description(e->layout, e->desc);
-        pango_layout_set_text(e->layout, e->text, -1);
-    }
+    pango_layout_set_text(e->layout, e->text, -1);
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_move_to(cr, e->x, e->y);
     pango_cairo_show_layout(cr, e->layout);
 }
 
-void elem_text_destroy(text_elem *e) {
-    if (e->layout != NULL)
-        g_object_unref(e->layout);
-    g_free(e->text);
-}
+void elem_text_destroy(text_elem *e) { g_free(e->text); }
 
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a) {
     font_elem *f = id_list_get_data(font_list, fontid);
@@ -271,12 +260,11 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->x = x;
     e->y = y;
     e->text = text;
-    e->desc = f->desc;
+    e->layout = f->layout;
     e->r = (double)r / (double)0xFFFF;
     e->g = (double)g / (double)0xFFFF;
     e->b = (double)b / (double)0xFFFF;
     e->a = (double)a / (double)0xFFFF;
-    e->layout = NULL;
     window_add_draw(id, e);
 }
 
