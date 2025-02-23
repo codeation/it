@@ -1,4 +1,3 @@
-#include "idlist.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 
@@ -8,10 +7,10 @@ typedef struct {
     int x, y;
 } layout_elem;
 
-static id_list *layout_list = NULL;
+static GHashTable *layout_table = NULL;
 
 GtkWidget *layout_get_widget(int id) {
-    layout_elem *l = id_list_get_data(layout_list, id);
+    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     return l->layout;
 }
 
@@ -31,19 +30,20 @@ void layout_create(int id, int parent_id) {
     }
     l->x = 0;
     l->y = 0;
-    if (layout_list == NULL)
-        layout_list = id_list_new();
-    id_list_append(layout_list, id, l);
+    if (layout_table == NULL)
+        layout_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_hash_table_insert(layout_table, GINT_TO_POINTER(id), l);
 }
 
 void layout_destroy(int id) {
-    layout_elem *l = id_list_remove(layout_list, id);
+    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     gtk_widget_destroy(GTK_WIDGET(l->layout));
     g_free(l);
 }
 
 void layout_size(int id, int x, int y, int width, int height) {
-    layout_elem *l = id_list_get_data(layout_list, id);
+    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     if (!GTK_IS_LAYOUT(l->layout)) {
         l->x = x;
         l->y = y;
@@ -56,7 +56,7 @@ void layout_size(int id, int x, int y, int width, int height) {
 }
 
 void layout_raise(int id) {
-    layout_elem *l = id_list_get_data(layout_list, id);
+    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     if (!GTK_IS_LAYOUT(l->layout)) {
         g_object_ref(l->layout);
         gtk_container_remove(GTK_CONTAINER(l->parent), l->layout);

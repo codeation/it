@@ -1,4 +1,3 @@
-#include "idlist.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 
@@ -11,7 +10,7 @@ typedef struct {
     char *label;
 } menu_elem;
 
-static id_list *menu_list = NULL;
+static GHashTable *menu_table = NULL;
 
 typedef struct {
     GMenuItem *item;
@@ -19,20 +18,18 @@ typedef struct {
     char *action;
 } menu_item;
 
-static id_list *menu_item_list = NULL;
-
 void menu_node_add(int id, int parent, char *label) {
-    if (menu_list == NULL) {
-        menu_list = id_list_new();
+    if (menu_table == NULL) {
+        menu_table = g_hash_table_new(g_direct_hash, g_direct_equal);
     }
     menu_elem *m = g_malloc(sizeof(menu_elem));
     m->menu = g_menu_new();
     m->label = label;
-    id_list_append(menu_list, id, m);
+    g_hash_table_insert(menu_table, GINT_TO_POINTER(id), m);
     if (parent == 0) {
         g_menu_append_submenu(barmenu, m->label, G_MENU_MODEL(m->menu));
     } else {
-        menu_elem *p = (menu_elem *)id_list_get_data(menu_list, parent);
+        menu_elem *p = g_hash_table_lookup(menu_table, GINT_TO_POINTER(parent));
         g_menu_append_submenu(p->menu, m->label, G_MENU_MODEL(m->menu));
     }
     g_object_unref(m->menu);
@@ -44,15 +41,11 @@ void menu_item_click(GSimpleAction *action, GVariant *parameter, gpointer p) {
 }
 
 void menu_item_add(int id, int parent, char *label, char *action) {
-    if (menu_item_list == NULL) {
-        menu_item_list = id_list_new();
-    }
     menu_item *i = g_malloc(sizeof(menu_item));
     i->item = g_menu_item_new(label, action);
     i->label = label;
     i->action = action;
-    id_list_append(menu_item_list, id, i);
-    menu_elem *m = (menu_elem *)id_list_get_data(menu_list, parent);
+    menu_elem *m = g_hash_table_lookup(menu_table, GINT_TO_POINTER(parent));
     g_menu_append_item(G_MENU(m->menu), i->item);
     g_object_unref(i->item);
     GSimpleAction *sa = g_simple_action_new(action + 4, NULL);

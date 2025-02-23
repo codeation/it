@@ -87,7 +87,7 @@ typedef struct {
     cairo_surface_t *bitmap;
 } bitmap_elem;
 
-static id_list *bitmap_list = NULL;
+static GHashTable *bitmap_table = NULL;
 
 void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
@@ -110,13 +110,14 @@ void bitmap_add(int id, int width, int height, unsigned char *data) {
     e->width = width;
     e->height = height;
     e->bitmap = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
-    if (bitmap_list == NULL)
-        bitmap_list = id_list_new();
-    id_list_append(bitmap_list, id, e);
+    if (bitmap_table == NULL)
+        bitmap_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_hash_table_insert(bitmap_table, GINT_TO_POINTER(id), e);
 }
 
 void bitmap_rem(int id) {
-    bitmap_elem *e = id_list_remove(bitmap_list, id);
+    bitmap_elem *e = g_hash_table_lookup(bitmap_table, GINT_TO_POINTER(id));
+    g_hash_table_remove(bitmap_table, GINT_TO_POINTER(id));
     cairo_surface_destroy(e->bitmap);
     g_free(e->data);
     g_free(e);
@@ -139,7 +140,7 @@ void elem_image_draw(cairo_t *cr, image_elem *e) {
 
 void elem_image_add(int id, int x, int y, int width, int height, int imageid) {
     image_elem *e = g_malloc(sizeof(image_elem));
-    bitmap_elem *b = id_list_get_data(bitmap_list, imageid);
+    bitmap_elem *b = g_hash_table_lookup(bitmap_table, GINT_TO_POINTER(imageid));
     e->type = DRAW_ELEM_IMAGE;
     e->x = x;
     e->y = y;
@@ -158,7 +159,7 @@ typedef struct {
     PangoLayout *split_layout;
 } font_elem;
 
-static id_list *font_list = NULL;
+static GHashTable *font_table = NULL;
 
 static PangoContext *top_pango_context = NULL;
 
@@ -179,13 +180,14 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     e->split_layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(e->split_layout, e->desc);
     pango_layout_set_wrap(e->split_layout, PANGO_WRAP_WORD_CHAR);
-    if (font_list == NULL)
-        font_list = id_list_new();
-    id_list_append(font_list, id, e);
+    if (font_table == NULL)
+        font_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_hash_table_insert(font_table, GINT_TO_POINTER(id), e);
 }
 
 void font_elem_rem(int id) {
-    font_elem *e = id_list_remove(font_list, id);
+    font_elem *e = g_hash_table_lookup(font_table, GINT_TO_POINTER(id));
+    g_hash_table_remove(font_table, GINT_TO_POINTER(id));
     g_object_unref(e->split_layout);
     g_object_unref(e->layout);
     pango_font_description_free(e->desc);
@@ -193,7 +195,7 @@ void font_elem_rem(int id) {
 }
 
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
-    font_elem *f = id_list_get_data(font_list, fontid);
+    font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
     *baseline = (int16_t)rint((double)pango_layout_get_baseline(f->layout) / PANGO_SCALE);
     PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(f->layout), f->desc, NULL);
     *lineheight = (int16_t)rint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
@@ -205,7 +207,7 @@ void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_
 // text split
 
 int16_t *font_split_text(int fontid, char *text, int edge, int indent) {
-    font_elem *f = id_list_get_data(font_list, fontid);
+    font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
     pango_layout_set_width(f->split_layout, PANGO_SCALE * edge);
     pango_layout_set_indent(f->split_layout, PANGO_SCALE * indent);
     pango_layout_set_text(f->split_layout, text, -1);
@@ -226,7 +228,7 @@ int16_t *font_split_text(int fontid, char *text, int edge, int indent) {
 // text rect
 
 void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
-    font_elem *f = id_list_get_data(font_list, fontid);
+    font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
     pango_layout_set_text(f->layout, text, -1);
     int w, h;
     pango_layout_get_pixel_size(f->layout, &w, &h);
@@ -254,7 +256,7 @@ void elem_text_draw(cairo_t *cr, text_elem *e) {
 void elem_text_destroy(text_elem *e) { g_free(e->text); }
 
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a) {
-    font_elem *f = id_list_get_data(font_list, fontid);
+    font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
     text_elem *e = g_malloc(sizeof(text_elem));
     e->type = DRAW_ELEM_TEXT;
     e->x = x;

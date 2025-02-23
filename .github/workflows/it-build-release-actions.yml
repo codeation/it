@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} runs a release build
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   create_release:
@@ -29,12 +29,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-13, macos-latest]
+        os: [ubuntu-latest, ubuntu-22.04, macos-13, macos-latest]
         include:
           - os: ubuntu-latest
             target: linux
-          - os: ubuntu-20.04
-            target: ubuntu.20.04
+          - os: ubuntu-22.04
+            target: ubuntu.22.04
           - os: macos-13
             target: darwin
           - os: macos-latest
@@ -46,8 +46,8 @@ jobs:
       - name: Install GTK 3 (apt-get)
         if: ${{ matrix.target == 'linux' }}
         run: sudo apt-get update && sudo apt-get install libgtk-3-dev
-      - name: Install GTK 3 (apt-get, ubuntu.20.04)
-        if: ${{ matrix.target == 'ubuntu.20.04' }}
+      - name: Install GTK 3 (apt-get, ubuntu.22.04)
+        if: ${{ matrix.target == 'ubuntu.22.04' }}
         run: sudo apt-get update && sudo apt-get install libgtk-3-dev
       - name: Install GTK 3 (brew)
         if: ${{ matrix.target == 'darwin' }}
@@ -60,7 +60,7 @@ jobs:
       - name: Archive it-${{ matrix.target }}.zip
         run: zip it-${{ matrix.target }}.zip it
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: actions/upload-release-asset@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
