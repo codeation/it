@@ -1,6 +1,5 @@
 #include "idlist.h"
 #include <glib.h>
-#include <stdio.h>
 
 id_list *id_list_new() {
     id_list *list = g_malloc(sizeof(id_list));

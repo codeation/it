@@ -29,16 +29,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-22.04, macos-13, macos-latest]
+        os: [ubuntu-latest, ubuntu-22.04, macos-latest, macos-13]
         include:
           - os: ubuntu-latest
             target: linux
           - os: ubuntu-22.04
             target: ubuntu.22.04
-          - os: macos-13
-            target: darwin
           - os: macos-latest
-            target: darwin.m1
+            target: darwin
+          - os: macos-13
+            target: darwin.intel
     steps:
       - uses: actions/checkout@v4
       - name: Print gcc version
@@ -53,7 +53,7 @@ jobs:
         if: ${{ matrix.target == 'darwin' }}
         run: brew install gtk+3
       - name: Install GTK 3 (brew)
-        if: ${{ matrix.target == 'darwin.m1' }}
+        if: ${{ matrix.target == 'darwin.intel' }}
         run: brew install gtk+3
       - name: Make all
         run: make
