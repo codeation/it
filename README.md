@@ -7,7 +7,7 @@ for [impress terminal details](https://codeation.github.io/impress/it-driver.htm
 
 ## Building
 
-Currently, the application uses [GTK+ 3](https://www.gtk.org) for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
+Currently, the application uses [GTK 3](https://www.gtk.org/) for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
 
 On **Debian/Ubuntu** you can run:
 
