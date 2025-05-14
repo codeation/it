@@ -79,7 +79,7 @@ static void reset_buffer(pipe_buffer *target) {
 gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data) {
     pipe_buffer *target = data;
     gsize len = 0;
-    GIOStatus status = g_io_channel_read_chars(source, target->buffer, (gsize)target->size, &len, NULL);
+    GIOStatus status = g_io_channel_read_chars(source, target->buffer, target->size, &len, NULL);
     if (status != G_IO_STATUS_NORMAL) {
         printf("read status: %d\n", status);
         exit(EXIT_FAILURE);
@@ -115,7 +115,7 @@ static void io_start(FILE *source, pipe_buffer *target, gboolean is_stream) {
         exit(EXIT_FAILURE);
     }
     if (is_stream) {
-        g_io_channel_set_buffer_size(chan, 64 * 1024);
+        g_io_channel_set_buffer_size(chan, 64LU * 1024LU);
     }
     target->in_id = g_io_add_watch(chan, G_IO_IN, async_read_chan, target);
     target->hup_id = g_io_add_watch(chan, G_IO_HUP, chan_error_func, target);

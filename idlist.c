@@ -14,10 +14,12 @@ void id_list_append(id_list *list, void *data) {
     id_list_elem *e = g_malloc(sizeof(id_list_elem));
     e->data = data;
     e->next = NULL;
-    if (list->root == NULL)
+    if (list->root == NULL) {
         list->root = e;
-    if (list->tail != NULL)
+    }
+    if (list->tail != NULL) {
         list->tail->next = e;
+    }
     list->tail = e;
 }
 

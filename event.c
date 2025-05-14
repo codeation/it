@@ -107,8 +107,8 @@ gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     button_event e;
     e.type = event->type;
     e.button = event->button;
-    e.x = (int16_t)(rint(event->x) - layoutOffsetX);
-    e.y = (int16_t)(rint(event->y) - layoutOffsetY);
+    e.x = (int16_t)(lrint(event->x) - layoutOffsetX);
+    e.y = (int16_t)(lrint(event->y) - layoutOffsetY);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -133,8 +133,8 @@ gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     prev_time = event->time;
     char command_type = 'm';
     motion_event e;
-    e.x = (int16_t)(rint(event->x) - layoutOffsetX);
-    e.y = (int16_t)(rint(event->y) - layoutOffsetY);
+    e.x = (int16_t)(lrint(event->x) - layoutOffsetX);
+    e.y = (int16_t)(lrint(event->y) - layoutOffsetY);
     e.shift = event->state & GDK_SHIFT_MASK ? 1 : 0;
     e.control = event->state & GDK_CONTROL_MASK ? 1 : 0;
     e.alt = event->state & GDK_MOD1_MASK ? 1 : 0;
@@ -156,8 +156,8 @@ gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
     char command_type = 's';
     scroll_event e;
     e.direction = event->direction;
-    e.delta_x = event->delta_x;
-    e.delta_y = event->delta_y;
+    e.delta_x = (int16_t)event->delta_x;
+    e.delta_y = (int16_t)event->delta_y;
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -166,10 +166,10 @@ gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
 
 // Menu events
 
-void s_menu_action(char *name) {
+void s_menu_action(char *action) {
     char command_type = 'u';
     pipe_event_write(&command_type, sizeof command_type);
-    pipe_event_write_string(name);
+    pipe_event_write_string(action);
     pipe_event_flush();
 }
 

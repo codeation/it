@@ -18,11 +18,12 @@ void window_create(int id, int layout_id) {
     w->x = 0;
     w->y = 0;
     w->draw_list = id_list_new();
-    g_signal_connect(G_OBJECT(w->draw), "draw", G_CALLBACK(draw_callback), w->draw_list);
+    g_signal_connect(w->draw, "draw", G_CALLBACK(draw_callback), w->draw_list);
     gtk_container_add(GTK_CONTAINER(w->layout), w->draw);
     gtk_widget_show(w->draw);
-    if (window_table == NULL)
+    if (window_table == NULL) {
         window_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    }
     g_hash_table_insert(window_table, GINT_TO_POINTER(id), w);
 }
 
@@ -49,10 +50,11 @@ void window_size(int id, int x, int y, int width, int height) {
     window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     w->x = x;
     w->y = y;
-    if (GTK_IS_LAYOUT(w->layout))
+    if (GTK_IS_LAYOUT(w->layout)) {
         gtk_layout_move(GTK_LAYOUT(w->layout), w->draw, w->x, w->y);
-    else
+    } else {
         gtk_fixed_move(GTK_FIXED(w->layout), w->draw, w->x, w->y);
+    }
     gtk_widget_set_size_request(w->draw, width, height);
 }
 
@@ -62,10 +64,11 @@ void window_raise(int id) {
     gtk_container_remove(GTK_CONTAINER(w->layout), w->draw);
     gtk_container_add(GTK_CONTAINER(w->layout), w->draw);
     g_object_unref(w->draw);
-    if (GTK_IS_LAYOUT(w->layout))
+    if (GTK_IS_LAYOUT(w->layout)) {
         gtk_layout_move(GTK_LAYOUT(w->layout), w->draw, w->x, w->y);
-    else
+    } else {
         gtk_fixed_move(GTK_FIXED(w->layout), w->draw, w->x, w->y);
+    }
 }
 
 void window_redraw(int id) {

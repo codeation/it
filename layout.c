@@ -30,8 +30,9 @@ void layout_create(int id, int parent_id) {
     }
     l->x = 0;
     l->y = 0;
-    if (layout_table == NULL)
+    if (layout_table == NULL) {
         layout_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    }
     g_hash_table_insert(layout_table, GINT_TO_POINTER(id), l);
 }
 
@@ -47,10 +48,11 @@ void layout_size(int id, int x, int y, int width, int height) {
     if (!GTK_IS_LAYOUT(l->layout)) {
         l->x = x;
         l->y = y;
-        if (GTK_IS_LAYOUT(l->parent))
+        if (GTK_IS_LAYOUT(l->parent)) {
             gtk_layout_move(GTK_LAYOUT(l->parent), l->layout, l->x, l->y);
-        else
+        } else {
             gtk_fixed_move(GTK_FIXED(l->parent), l->layout, l->x, l->y);
+        }
         gtk_widget_set_size_request(l->layout, width, height);
     }
 }
@@ -62,9 +64,10 @@ void layout_raise(int id) {
         gtk_container_remove(GTK_CONTAINER(l->parent), l->layout);
         gtk_container_add(GTK_CONTAINER(l->parent), l->layout);
         g_object_unref(l->layout);
-        if (GTK_IS_LAYOUT(l->parent))
+        if (GTK_IS_LAYOUT(l->parent)) {
             gtk_layout_move(GTK_LAYOUT(l->parent), l->layout, l->x, l->y);
-        else
+        } else {
             gtk_fixed_move(GTK_FIXED(l->parent), l->layout, l->x, l->y);
+        }
     }
 }

@@ -110,8 +110,9 @@ void bitmap_add(int id, int width, int height, unsigned char *data) {
     e->width = width;
     e->height = height;
     e->bitmap = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
-    if (bitmap_table == NULL)
+    if (bitmap_table == NULL) {
         bitmap_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    }
     g_hash_table_insert(bitmap_table, GINT_TO_POINTER(id), e);
 }
 
@@ -164,8 +165,9 @@ static GHashTable *font_table = NULL;
 static PangoContext *top_pango_context = NULL;
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
-    if (top_pango_context == NULL)
+    if (top_pango_context == NULL) {
         top_pango_context = gtk_widget_get_pango_context(top);
+    }
     font_elem *e = g_malloc(sizeof(font_elem));
     e->height = height;
     e->desc = pango_font_description_new();
@@ -180,8 +182,9 @@ void font_elem_add(int id, int height, char *family, int style, int variant, int
     e->split_layout = pango_layout_new(top_pango_context);
     pango_layout_set_font_description(e->split_layout, e->desc);
     pango_layout_set_wrap(e->split_layout, PANGO_WRAP_WORD_CHAR);
-    if (font_table == NULL)
+    if (font_table == NULL) {
         font_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    }
     g_hash_table_insert(font_table, GINT_TO_POINTER(id), e);
 }
 
@@ -196,11 +199,11 @@ void font_elem_rem(int id) {
 
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
     font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
-    *baseline = (int16_t)rint((double)pango_layout_get_baseline(f->layout) / PANGO_SCALE);
+    *baseline = (int16_t)lrint((double)pango_layout_get_baseline(f->layout) / PANGO_SCALE);
     PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(f->layout), f->desc, NULL);
-    *lineheight = (int16_t)rint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
-    *ascent = (int16_t)rint((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
-    *descent = (int16_t)rint((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
+    *lineheight = (int16_t)lrint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
+    *ascent = (int16_t)lrint((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
+    *descent = (int16_t)lrint((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
     pango_font_metrics_unref(metrics);
 }
 
@@ -212,9 +215,10 @@ int16_t *font_split_text(int fontid, char *text, int edge, int indent) {
     pango_layout_set_indent(f->split_layout, PANGO_SCALE * indent);
     pango_layout_set_text(f->split_layout, text, -1);
     GSList *top = pango_layout_get_lines_readonly(f->split_layout);
-    int length = 0;
-    for (GSList *e = top; e != NULL; e = e->next)
+    int16_t length = 0;
+    for (GSList *e = top; e != NULL; e = e->next) {
         length++;
+    }
     int16_t *out = g_malloc(sizeof(int16_t) * (length + 1));
     int16_t *pos = out;
     *pos++ = length;

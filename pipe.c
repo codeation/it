@@ -59,12 +59,12 @@ void pipe_output_write(const void *data, const int length) {
 }
 
 void pipe_output_write_string(const char *data) {
-    int32_t length = strlen(data);
+    int32_t length = (int32_t)strlen(data);
     pipe_output_write(&length, sizeof length);
     pipe_output_write(data, length);
 }
 
-void pipe_output_flush() { fflush(handle_output); }
+void pipe_output_flush() { (void)fflush(handle_output); }
 
 void pipe_event_write(const void *data, const int length) {
     if (fwrite(data, length, 1, handle_event) == 0) {
@@ -74,9 +74,9 @@ void pipe_event_write(const void *data, const int length) {
 }
 
 void pipe_event_write_string(const char *data) {
-    int32_t length = strlen(data);
+    int32_t length = (int32_t)strlen(data);
     pipe_event_write(&length, sizeof length);
     pipe_event_write(data, length);
 }
 
-void pipe_event_flush() { fflush(handle_event); }
+void pipe_event_flush() { (void)fflush(handle_event); }

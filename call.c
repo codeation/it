@@ -176,7 +176,7 @@ static void splitText(void *text) {
         pipe_output_write(&value, sizeof value);
         pipe_output_flush();
     } else {
-        int length = (1 + *out) * sizeof(int16_t);
+        int length = (1 + *out) * (int)sizeof(int16_t);
         pipe_output_write(out, length);
         pipe_output_flush();
         g_free(out);
