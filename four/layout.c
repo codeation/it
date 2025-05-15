@@ -34,11 +34,16 @@ static void layout_main_create(int id) {
     g_signal_connect(l->adjustment, "changed", G_CALLBACK(adjustment_notify), NULL);
     g_signal_connect(l->adjustment, "value-changed", G_CALLBACK(adjustment_notify), NULL);
 
+    GtkEventController *keyEventController = gtk_event_controller_key_new();
+    g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);
+    gtk_widget_add_controller(l->scrolled, keyEventController);
+
     GtkGesture *getstureConroller = gtk_gesture_click_new();
     gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(getstureConroller), 0);
     gtk_gesture_single_set_touch_only(GTK_GESTURE_SINGLE(getstureConroller), FALSE);
     g_signal_connect(getstureConroller, "pressed", G_CALLBACK(button_pressed), NULL);
     g_signal_connect(getstureConroller, "released", G_CALLBACK(button_released), NULL);
+    g_signal_connect(getstureConroller, "unpaired-release", G_CALLBACK(button_released), NULL);
     gtk_widget_add_controller(l->scrolled, GTK_EVENT_CONTROLLER(getstureConroller));
 
     GtkEventController *motionEventController = gtk_event_controller_motion_new();

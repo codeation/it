@@ -198,9 +198,14 @@ void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointe
     prev_button_time = gdk_event_get_time(event);
     prev_button_type = gdk_event_get_event_type(event);
     char command_type = 'm';
+    GdkModifierType state = gdk_event_get_modifier_state(event);
     motion_event e;
     e.x = (int16_t)x;
     e.y = (int16_t)y;
+    e.shift = state & GDK_SHIFT_MASK ? 1 : 0;
+    e.control = state & GDK_CONTROL_MASK ? 1 : 0;
+    e.alt = state & GDK_ALT_MASK ? 1 : 0;
+    e.meta = state & GDK_META_MASK ? 1 : 0;
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();

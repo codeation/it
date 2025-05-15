@@ -16,10 +16,6 @@ static void on_app_activate(GApplication *application, gpointer data) {
     top = gtk_application_window_new(GTK_APPLICATION(app));
     g_signal_connect(top, "close-request", G_CALLBACK(on_delete), NULL);
 
-    GtkEventController *keyEventController = gtk_event_controller_key_new();
-    g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);
-    gtk_widget_add_controller(top, keyEventController);
-
     pipe_init(pipe_suffix);
 }
 
