@@ -7,21 +7,19 @@ for [impress terminal details](https://codeation.github.io/impress/it-driver.htm
 
 ## Building
 
-Currently, the application uses [GTK 3](https://www.gtk.org/) for rendering, event collecting, etc. You should install `libgtk+-3.0` and packages that depend on GTK.
+Currently, the application uses [GTK](https://www.gtk.org/) for rendering, event collecting, etc. You should install GTK and packages that depend on GTK. Also `pkg-config` must be installed.
 
 On **Debian/Ubuntu** you can run:
 
 ```
-sudo apt-get install libgtk-3-dev
+sudo apt-get install libgtk-4-dev
 ```
-
-Also [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) must be installed.
 
 To build binary, download the sources:
 
 ```
 git clone https://github.com/codeation/it.git
-cd it
+cd it/four
 ```
 
 and use the following command in project directory:
