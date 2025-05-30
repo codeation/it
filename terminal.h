@@ -89,13 +89,13 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, 
 void elem_image_add(int id, int x, int y, int width, int height, int imageid);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a);
 
-void elem_draw_destroy(void *data);
+void elem_draw_destroy(void *e);
 
 // menu
 
 void menu_node_add(int id, int parent, char *label);
 void menu_item_add(int id, int parent, char *label, char *action);
 
-gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data);
+gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer draw_list);
 
 #endif

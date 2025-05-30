@@ -1,4 +1,3 @@
-#include "idlist.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 
@@ -6,7 +5,7 @@ typedef struct {
     GtkWidget *draw;
     GtkWidget *layout;
     int x, y;
-    id_list *draw_list;
+    GPtrArray *draw_list;
 } window_elem;
 
 static GHashTable *window_table = NULL;
@@ -17,7 +16,7 @@ void window_create(int id, int layout_id) {
     w->layout = layout_get_widget(layout_id);
     w->x = 0;
     w->y = 0;
-    w->draw_list = id_list_new();
+    w->draw_list = g_ptr_array_new_with_free_func(elem_draw_destroy);
     g_signal_connect(w->draw, "draw", G_CALLBACK(draw_callback), w->draw_list);
     gtk_container_add(GTK_CONTAINER(w->layout), w->draw);
     gtk_widget_show(w->draw);
@@ -30,20 +29,19 @@ void window_create(int id, int layout_id) {
 void window_destroy(int id) {
     window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_hash_table_remove(window_table, GINT_TO_POINTER(id));
-    id_list_remove_all(w->draw_list, elem_draw_destroy);
-    id_list_free(w->draw_list);
+    g_ptr_array_free(w->draw_list, TRUE);
     gtk_widget_destroy(GTK_WIDGET(w->draw));
     g_free(w);
 }
 
 void window_clear(int id) {
     window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
-    id_list_remove_all(w->draw_list, elem_draw_destroy);
+    g_ptr_array_remove_range(w->draw_list, 0, w->draw_list->len);
 }
 
 void window_add_draw(int id, void *data) {
     window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
-    id_list_append(w->draw_list, data);
+    g_ptr_array_add(w->draw_list, data);
 }
 
 void window_size(int id, int x, int y, int width, int height) {

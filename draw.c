@@ -1,4 +1,3 @@
-#include "idlist.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 #include <math.h>
@@ -276,35 +275,35 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
 
 // callback
 
-gboolean draw_callback(GtkWidget *widget, cairo_t *cr, void *data) {
-    cairo_save(cr);
-    for (id_list_elem *e = id_list_root(data); e != NULL; e = id_list_elem_next(e)) {
-        type_elem *t = id_list_elem_data(e);
-        switch (t->type) {
-        case DRAW_ELEM_FILL:
-            elem_fill_draw(cr, id_list_elem_data(e));
-            break;
-        case DRAW_ELEM_LINE:
-            elem_line_draw(cr, id_list_elem_data(e));
-            break;
-        case DRAW_ELEM_TEXT:
-            elem_text_draw(cr, id_list_elem_data(e));
-            break;
-        case DRAW_ELEM_IMAGE:
-            elem_image_draw(cr, id_list_elem_data(e));
-            break;
-        }
+static void draw_any_elem(gpointer e, gpointer cr) {
+    switch (((type_elem *)e)->type) {
+    case DRAW_ELEM_FILL:
+        elem_fill_draw(cr, e);
+        break;
+    case DRAW_ELEM_LINE:
+        elem_line_draw(cr, e);
+        break;
+    case DRAW_ELEM_TEXT:
+        elem_text_draw(cr, e);
+        break;
+    case DRAW_ELEM_IMAGE:
+        elem_image_draw(cr, e);
+        break;
     }
+}
+
+gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer draw_list) {
+    cairo_save(cr);
+    g_ptr_array_foreach(draw_list, draw_any_elem, cr);
     cairo_restore(cr);
     return FALSE;
 }
 
-void elem_draw_destroy(void *data) {
-    type_elem *t = data;
-    switch (t->type) {
+void elem_draw_destroy(void *e) {
+    switch (((type_elem *)e)->type) {
     case DRAW_ELEM_TEXT:
-        elem_text_destroy(data);
+        elem_text_destroy(e);
         break;
     }
-    g_free(data);
+    g_free(e);
 }

@@ -1,10 +1,10 @@
 CFLAGS=$(shell pkg-config --cflags gtk4)
 LDFLAGS=$(shell pkg-config --libs gtk4)
 
-it: call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o
-	gcc -o it call.o draw.o event.o idlist.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -Wall -O3 -ffast-math -lm
+it: call.o draw.o event.o io.o layout.o main.o menu.o pipe.o version.o window.o
+	gcc -o it call.o draw.o event.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -Wall -O3 -ffast-math -lm
 
-%.o: %.c terminal.h idlist.h
+%.o: %.c terminal.h
 	gcc -c $(CFLAGS) -Wall -O3 -ffast-math $<
 
 clean:
@@ -16,8 +16,6 @@ format:
 	clang-format -i call.c
 	clang-format -i draw.c
 	clang-format -i event.c
-	clang-format -i idlist.h
-	clang-format -i idlist.c
 	clang-format -i io.c
 	clang-format -i layout.c
 	clang-format -i main.c
