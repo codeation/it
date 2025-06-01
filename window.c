@@ -10,6 +10,13 @@ typedef struct {
 
 static GHashTable *window_table = NULL;
 
+static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer draw_list) {
+    cairo_save(cr);
+    g_ptr_array_foreach(draw_list, draw_any_elem, cr);
+    cairo_restore(cr);
+    return FALSE;
+}
+
 void window_create(int id, int layout_id) {
     window_elem *w = g_malloc(sizeof(window_elem));
     w->draw = gtk_drawing_area_new();
@@ -39,9 +46,9 @@ void window_clear(int id) {
     g_ptr_array_remove_range(w->draw_list, 0, w->draw_list->len);
 }
 
-void window_add_draw(int id, void *data) {
+void window_add_draw(int id, gpointer e) {
     window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
-    g_ptr_array_add(w->draw_list, data);
+    g_ptr_array_add(w->draw_list, e);
 }
 
 void window_size(int id, int x, int y, int width, int height) {

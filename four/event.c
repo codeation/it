@@ -11,7 +11,7 @@ _Static_assert(sizeof(general_event) == 4, "wrong general_event align");
 
 #define GENERAL_EVENT_DESTROY 1
 
-gboolean on_delete(GtkWidget *widget, gpointer data) {
+static gboolean on_delete(GtkWidget *widget, gpointer data) {
     char command_type = 'g';
     general_event e;
     e.id = GENERAL_EVENT_DESTROY;
@@ -48,8 +48,6 @@ static void write_configure_event_once(configure_event *e) {
 static int idle_count = 0;
 static GtkWidget *inner_size_widget = NULL;
 
-void set_inner_size_widget(GtkWidget *widget) { inner_size_widget = widget; }
-
 static void on_configure_event(gpointer user_data) {
     int inner_width = gtk_widget_get_width(inner_size_widget);
     int inner_height = gtk_widget_get_height(inner_size_widget);
@@ -75,14 +73,14 @@ static gboolean idle_func(gpointer user_data) {
     return G_SOURCE_REMOVE;
 }
 
-void size_notify(GObject *self, GParamSpec *pspec, gpointer user_data) {
+static void size_notify(GObject *self, GParamSpec *pspec, gpointer user_data) {
     if (idle_count <= 0) {
         g_idle_add(idle_func, user_data);
     }
     idle_count++;
 }
 
-void adjustment_notify(GtkAdjustment *self, gpointer user_data) {
+static void adjustment_notify(GtkAdjustment *self, gpointer user_data) {
     if (idle_count <= 0) {
         g_idle_add(idle_func, user_data);
     }
@@ -101,8 +99,8 @@ typedef struct {
 
 _Static_assert(sizeof(keyboard_event) == 8, "wrong keyboard_event align");
 
-gboolean key_pressed(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
-                     gpointer user_data) {
+static gboolean key_pressed(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
+                            gpointer user_data) {
     char command_type = 'k';
     keyboard_event e;
     e.unicode = gdk_keyval_to_unicode(keyval);
@@ -144,7 +142,7 @@ static int buttonType(int n_press) {
 static guint32 prev_button_time = 0;
 static GdkEventType prev_button_type = 0;
 
-void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
+static void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
     GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(self));
     if (gdk_event_get_time(event) == prev_button_time && gdk_event_get_event_type(event) == prev_button_type) {
         return;
@@ -155,14 +153,14 @@ void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, g
     button_event e;
     e.type = buttonType(n_press);
     e.button = gdk_button_event_get_button(event);
-    e.x = (int16_t)x;
-    e.y = (int16_t)y;
+    e.x = (int16_t)lrint(x);
+    e.y = (int16_t)lrint(y);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
 }
 
-void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
+static void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer user_data) {
     GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(self));
     if (gdk_event_get_time(event) == prev_button_time && gdk_event_get_event_type(event) == prev_button_type) {
         return;
@@ -173,8 +171,8 @@ void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdouble y, 
     button_event e;
     e.type = 7;
     e.button = gdk_button_event_get_button(event);
-    e.x = (int16_t)x;
-    e.y = (int16_t)y;
+    e.x = (int16_t)lrint(x);
+    e.y = (int16_t)lrint(y);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -190,7 +188,7 @@ typedef struct {
 
 _Static_assert(sizeof(motion_event) == 8, "wrong motion_event align");
 
-void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer user_data) {
+static void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointer user_data) {
     GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(self));
     if (gdk_event_get_time(event) == prev_button_time && gdk_event_get_event_type(event) == prev_button_type) {
         return;
@@ -200,8 +198,8 @@ void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, gpointe
     char command_type = 'm';
     GdkModifierType state = gdk_event_get_modifier_state(event);
     motion_event e;
-    e.x = (int16_t)x;
-    e.y = (int16_t)y;
+    e.x = (int16_t)lrint(x);
+    e.y = (int16_t)lrint(y);
     e.shift = state & GDK_SHIFT_MASK ? 1 : 0;
     e.control = state & GDK_CONTROL_MASK ? 1 : 0;
     e.alt = state & GDK_ALT_MASK ? 1 : 0;
@@ -218,12 +216,12 @@ typedef struct {
 
 _Static_assert(sizeof(scroll_event) == 6, "wrong scroll_event align");
 
-gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer user_data) {
+static gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer user_data) {
     char command_type = 's';
     scroll_event e;
     e.direction = 4;
-    e.delta_x = (int16_t)dx;
-    e.delta_y = (int16_t)dy;
+    e.delta_x = (int16_t)lrint(dx);
+    e.delta_y = (int16_t)lrint(dy);
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -247,7 +245,7 @@ typedef struct {
 
 _Static_assert(sizeof(clipboard_event) == 2, "wrong clipboard_event align");
 
-void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer data) {
+static void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer data) {
     char *text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source_object), res, NULL);
     char command_type = 'c';
     clipboard_event e;
@@ -272,4 +270,36 @@ void set_clipboard(int clipboardtypeid, void *data) {
     GdkClipboard *clipboard = gtk_widget_get_clipboard(top);
     gdk_clipboard_set_value(clipboard, &value);
     g_value_unset(&value);
+}
+
+// Signal connect
+
+void top_signal_connect() { g_signal_connect(top, "close-request", G_CALLBACK(on_delete), NULL); }
+
+void layout_signal_connect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
+    inner_size_widget = scrolled;
+    g_signal_connect(top, "notify::default-width", G_CALLBACK(size_notify), NULL);
+    g_signal_connect(top, "notify::default-height", G_CALLBACK(size_notify), NULL);
+    g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_notify), NULL);
+    g_signal_connect(adjustment, "value-changed", G_CALLBACK(adjustment_notify), NULL);
+
+    GtkEventController *keyEventController = gtk_event_controller_key_new();
+    g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);
+    gtk_widget_add_controller(scrolled, keyEventController);
+
+    GtkGesture *getstureConroller = gtk_gesture_click_new();
+    gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(getstureConroller), 0);
+    gtk_gesture_single_set_touch_only(GTK_GESTURE_SINGLE(getstureConroller), FALSE);
+    g_signal_connect(getstureConroller, "pressed", G_CALLBACK(button_pressed), NULL);
+    g_signal_connect(getstureConroller, "released", G_CALLBACK(button_released), NULL);
+    g_signal_connect(getstureConroller, "unpaired-release", G_CALLBACK(button_released), NULL);
+    gtk_widget_add_controller(scrolled, GTK_EVENT_CONTROLLER(getstureConroller));
+
+    GtkEventController *motionEventController = gtk_event_controller_motion_new();
+    g_signal_connect(motionEventController, "motion", G_CALLBACK(motion_notify), NULL);
+    gtk_widget_add_controller(scrolled, motionEventController);
+
+    GtkEventController *scrollEventController = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+    g_signal_connect(scrollEventController, "scroll", G_CALLBACK(scroll_notify), NULL);
+    gtk_widget_add_controller(scrolled, scrollEventController);
 }

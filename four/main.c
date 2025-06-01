@@ -14,7 +14,7 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_object_unref(barmenu);
 
     top = gtk_application_window_new(GTK_APPLICATION(app));
-    g_signal_connect(top, "close-request", G_CALLBACK(on_delete), NULL);
+    top_signal_connect();
 
     pipe_init(pipe_suffix);
 }

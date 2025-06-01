@@ -19,7 +19,7 @@ void layout_create(int id, int parent_id) {
     if (id == 1 && parent_id == 0) {
         l->layout = gtk_layout_new(NULL, NULL);
         l->parent = top;
-        g_signal_connect(l->layout, "size-allocate", G_CALLBACK(on_size_allocate), NULL);
+        layout_signal_connect(l->layout);
         gtk_container_add(GTK_CONTAINER(l->parent), l->layout);
         gtk_widget_show_all(top);
     } else {

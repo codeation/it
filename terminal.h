@@ -35,12 +35,9 @@ gboolean io_exited();
 
 // event
 
-gboolean on_delete(GtkWidget *widget, GdkEvent *event, gpointer data);
-void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data);
-gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data);
-gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data);
-gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data);
-gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data);
+void top_signal_connect();
+void layout_signal_connect(GtkWidget *layout);
+
 void s_menu_action(char *action);
 void request_clipboard(int clipboardtypeid);
 void set_clipboard(int clipboardtypeid, void *data);
@@ -67,7 +64,7 @@ void window_size(int id, int x, int y, int width, int height);
 void window_redraw(int id);
 void window_clear(int id);
 
-void window_add_draw(int id, void *data);
+void window_add_draw(int id, gpointer e);
 
 // bitmap
 
@@ -89,13 +86,12 @@ void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, 
 void elem_image_add(int id, int x, int y, int width, int height, int imageid);
 void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a);
 
-void elem_draw_destroy(void *e);
+void draw_any_elem(gpointer e, gpointer cr);
+void elem_draw_destroy(gpointer e);
 
 // menu
 
 void menu_node_add(int id, int parent, char *label);
 void menu_item_add(int id, int parent, char *label, char *action);
-
-gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer draw_list);
 
 #endif

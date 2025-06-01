@@ -14,13 +14,7 @@ static void on_app_activate(GApplication *application, gpointer data) {
     g_object_unref(barmenu);
 
     top = gtk_application_window_new(GTK_APPLICATION(app));
-
-    g_signal_connect(top, "delete-event", G_CALLBACK(on_delete), NULL);
-    g_signal_connect(top, "key_press_event", G_CALLBACK(s_keypress), NULL);
-    g_signal_connect(top, "button_press_event", G_CALLBACK(s_button), NULL);
-    g_signal_connect(top, "button_release_event", G_CALLBACK(s_button), NULL);
-    g_signal_connect(top, "motion_notify_event", G_CALLBACK(s_motion), NULL);
-    g_signal_connect(top, "scroll-event", G_CALLBACK(s_scroll), NULL);
+    top_signal_connect();
 
     pipe_init(pipe_suffix);
 }

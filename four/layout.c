@@ -28,31 +28,7 @@ static void layout_main_create(int id) {
     gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(l->scrolled), l->adjustment);
     gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(l->scrolled), l->adjustment);
 
-    set_inner_size_widget(l->scrolled);
-    g_signal_connect(l->parent, "notify::default-width", G_CALLBACK(size_notify), NULL);
-    g_signal_connect(l->parent, "notify::default-height", G_CALLBACK(size_notify), NULL);
-    g_signal_connect(l->adjustment, "changed", G_CALLBACK(adjustment_notify), NULL);
-    g_signal_connect(l->adjustment, "value-changed", G_CALLBACK(adjustment_notify), NULL);
-
-    GtkEventController *keyEventController = gtk_event_controller_key_new();
-    g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);
-    gtk_widget_add_controller(l->scrolled, keyEventController);
-
-    GtkGesture *getstureConroller = gtk_gesture_click_new();
-    gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(getstureConroller), 0);
-    gtk_gesture_single_set_touch_only(GTK_GESTURE_SINGLE(getstureConroller), FALSE);
-    g_signal_connect(getstureConroller, "pressed", G_CALLBACK(button_pressed), NULL);
-    g_signal_connect(getstureConroller, "released", G_CALLBACK(button_released), NULL);
-    g_signal_connect(getstureConroller, "unpaired-release", G_CALLBACK(button_released), NULL);
-    gtk_widget_add_controller(l->scrolled, GTK_EVENT_CONTROLLER(getstureConroller));
-
-    GtkEventController *motionEventController = gtk_event_controller_motion_new();
-    g_signal_connect(motionEventController, "motion", G_CALLBACK(motion_notify), NULL);
-    gtk_widget_add_controller(l->scrolled, motionEventController);
-
-    GtkEventController *scrollEventController = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
-    g_signal_connect(scrollEventController, "scroll", G_CALLBACK(scroll_notify), NULL);
-    gtk_widget_add_controller(l->scrolled, scrollEventController);
+    layout_signal_connect(l->scrolled, l->adjustment);
 
     gtk_widget_set_visible(l->scrolled, TRUE);
     gtk_widget_set_visible(l->layout, TRUE);

@@ -197,11 +197,11 @@ void font_elem_rem(int id) {
 
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
     font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
-    *baseline = (int16_t)lrint((double)pango_layout_get_baseline(f->layout) / PANGO_SCALE);
+    *baseline = (int16_t)(pango_layout_get_baseline(f->layout) / PANGO_SCALE);
     PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(f->layout), f->desc, NULL);
-    *lineheight = (int16_t)lrint((double)pango_font_metrics_get_height(metrics) / PANGO_SCALE);
-    *ascent = (int16_t)lrint((double)pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
-    *descent = (int16_t)lrint((double)pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
+    *lineheight = (int16_t)(pango_font_metrics_get_height(metrics) / PANGO_SCALE);
+    *ascent = (int16_t)(pango_font_metrics_get_ascent(metrics) / PANGO_SCALE);
+    *descent = (int16_t)(pango_font_metrics_get_descent(metrics) / PANGO_SCALE);
     pango_font_metrics_unref(metrics);
 }
 
@@ -272,9 +272,9 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     window_add_draw(id, e);
 }
 
-// callback
+// any elem
 
-static void draw_any_elem(gpointer e, gpointer cr) {
+void draw_any_elem(gpointer e, gpointer cr) {
     switch (((type_elem *)e)->type) {
     case DRAW_ELEM_FILL:
         elem_fill_draw(cr, e);
@@ -291,13 +291,7 @@ static void draw_any_elem(gpointer e, gpointer cr) {
     }
 }
 
-void draw_callback(GtkDrawingArea *widget, cairo_t *cr, int width, int height, gpointer draw_list) {
-    cairo_save(cr);
-    g_ptr_array_foreach(draw_list, draw_any_elem, cr);
-    cairo_restore(cr);
-}
-
-void elem_draw_destroy(void *e) {
+void elem_draw_destroy(gpointer e) {
     switch (((type_elem *)e)->type) {
     case DRAW_ELEM_TEXT:
         elem_text_destroy(e);

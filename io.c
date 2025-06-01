@@ -76,7 +76,7 @@ static void reset_buffer(pipe_buffer *target) {
     target->next_func = call_command;
 }
 
-gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data) {
+static gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer data) {
     pipe_buffer *target = data;
     gsize len = 0;
     GIOStatus status = g_io_channel_read_chars(source, target->buffer, target->size, &len, NULL);
@@ -95,7 +95,7 @@ gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpointer da
     return TRUE;
 }
 
-gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpointer data) {
+static gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpointer data) {
     perror("connection has been broken");
     exit(EXIT_FAILURE);
     return TRUE;
