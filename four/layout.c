@@ -42,7 +42,7 @@ static void layout_main_destroy(int id) {
     layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     // gtk_widget_unparent(l->layout);
-    gtk_widget_unparent(l->scrolled);
+    // gtk_widget_unparent(l->scrolled);
     g_free(l);
 }
 
