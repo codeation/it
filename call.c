@@ -19,7 +19,9 @@ static void commandExit(pipe_buffer *target) {
 
 // clear command
 
-static struct { int16_t id; } windowid;
+static struct {
+    int16_t id;
+} windowid;
 
 _Static_assert(sizeof windowid == 2, "wrong windowid align");
 
@@ -117,7 +119,9 @@ static void commandImageAdd(pipe_buffer *target) {
 
 // remove image
 
-static struct { int16_t id; } imageid;
+static struct {
+    int16_t id;
+} imageid;
 
 _Static_assert(sizeof imageid == 2, "wrong imageid align");
 
@@ -151,7 +155,9 @@ static void commandFont(pipe_buffer *target) { parameters_alloc_to_call(target, 
 
 // remove font
 
-static struct { int16_t id; } fontid;
+static struct {
+    int16_t id;
+} fontid;
 
 _Static_assert(sizeof fontid == 2, "wrong fontid align");
 
@@ -188,7 +194,9 @@ static void commandSplit(pipe_buffer *target) { parameters_alloc_to_call(target,
 
 // text rect
 
-static struct { int16_t fontid; } textrect;
+static struct {
+    int16_t fontid;
+} textrect;
 
 static void rectText(void *text) {
     int16_t width, height;
@@ -251,7 +259,9 @@ static void commandLayout(pipe_buffer *target) { parameters_to_call(target, &lay
 
 // layout drop
 
-static struct { int16_t id; } layoutid;
+static struct {
+    int16_t id;
+} layoutid;
 
 static void dropLayout() { layout_destroy(layoutid.id); }
 
@@ -376,7 +386,9 @@ static void commandMenuItem(pipe_buffer *target) {
 
 // clipboard
 
-static struct { int16_t id; } clipboardtypeid;
+static struct {
+    int16_t id;
+} clipboardtypeid;
 
 _Static_assert(sizeof clipboardtypeid == 2, "wrong copy align");
 
