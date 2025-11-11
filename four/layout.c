@@ -1,3 +1,4 @@
+#include "glib-object.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 
@@ -41,8 +42,11 @@ static void layout_main_create(int id) {
 static void layout_main_destroy(int id) {
     layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
-    // gtk_widget_unparent(l->layout);
-    // gtk_widget_unparent(l->scrolled);
+    layout_signal_disconnect(l->scrolled, l->adjustment);
+    gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
+    gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
+    gtk_window_set_child(GTK_WINDOW(top), NULL);
     g_free(l);
 }
 
@@ -62,7 +66,7 @@ static void layout_node_create(int id, int parent_id) {
     l->layout = gtk_fixed_new();
     gtk_widget_set_overflow(l->layout, GTK_OVERFLOW_HIDDEN);
     l->parent = layout_get_widget(parent_id);
-    gtk_widget_set_parent(l->layout, l->parent);
+    gtk_fixed_put(GTK_FIXED(l->parent), l->layout, 0, 0);
     l->x = 0;
     l->y = 0;
     gtk_widget_set_visible(l->layout, TRUE);
@@ -72,7 +76,7 @@ static void layout_node_create(int id, int parent_id) {
 static void layout_node_destroy(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
-    gtk_widget_unparent(l->layout);
+    gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
     g_free(l);
 }
 
@@ -87,10 +91,9 @@ static void layout_node_size(int id, int x, int y, int width, int height) {
 static void layout_node_raise(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_object_ref(l->layout);
-    gtk_widget_unparent(l->layout);
-    gtk_widget_set_parent(l->layout, l->parent);
+    gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
+    gtk_fixed_put(GTK_FIXED(l->parent), l->layout, l->x, l->y);
     g_object_unref(l->layout);
-    gtk_fixed_move(GTK_FIXED(l->parent), l->layout, l->x, l->y);
 }
 
 GtkWidget *layout_get_widget(int id) {

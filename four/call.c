@@ -11,8 +11,13 @@ static void commandVersion() {
 // exit
 
 static void commandExit(pipe_buffer *target) {
+    static int exitCount = 0;
+    if (exitCount++ == 0) {
+        top_signal_disconnect();
+    }
     io_stop(target);
     if (io_exited()) {
+        gtk_window_destroy(GTK_WINDOW(top));
         g_application_quit(G_APPLICATION(app));
     }
 }

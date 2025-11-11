@@ -23,6 +23,13 @@ static FILE *pipe_open(char *name, char *suffix, char *filemode) {
     return handle;
 }
 
+static void pipe_close(FILE *handle) {
+    if (fclose(handle) != 0) {
+        perror("pipe close failed");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void pipe_init(char *pipe_suffix) {
     handle_output = pipe_open(FIFO_OUTPUT_PATH, pipe_suffix, "w");
     handle_event = pipe_open(FIFO_EVENT_PATH, pipe_suffix, "w");
@@ -33,22 +40,10 @@ void pipe_init(char *pipe_suffix) {
 }
 
 void pipe_done() {
-    if (fclose(handle_input) != 0) {
-        perror("pipe close failed (i)");
-        exit(EXIT_FAILURE);
-    }
-    if (fclose(handle_stream) != 0) {
-        perror("pipe close failed (s)");
-        exit(EXIT_FAILURE);
-    }
-    if (fclose(handle_output) != 0) {
-        perror("pipe close failed (o)");
-        exit(EXIT_FAILURE);
-    }
-    if (fclose(handle_event) != 0) {
-        perror("pipe close failed (e)");
-        exit(EXIT_FAILURE);
-    }
+    pipe_close(handle_input);
+    pipe_close(handle_stream);
+    pipe_close(handle_output);
+    pipe_close(handle_event);
 }
 
 void pipe_output_write(const void *data, const int length) {

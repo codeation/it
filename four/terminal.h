@@ -36,7 +36,9 @@ gboolean io_exited();
 // event
 
 void top_signal_connect();
+void top_signal_disconnect();
 void layout_signal_connect(GtkWidget *scrolled, GtkAdjustment *adjustment);
+void layout_signal_disconnect(GtkWidget *scrolled, GtkAdjustment *adjustment);
 
 void s_menu_action(char *action);
 void request_clipboard(int clipboardtypeid);

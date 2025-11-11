@@ -11,8 +11,13 @@ static void commandVersion() {
 // exit
 
 static void commandExit(pipe_buffer *target) {
+    static int exitCount = 0;
+    if (exitCount++ == 0) {
+        top_signal_disconnect();
+    }
     io_stop(target);
     if (io_exited()) {
+        gtk_widget_destroy(top);
         g_application_quit(G_APPLICATION(app));
     }
 }
@@ -225,7 +230,6 @@ _Static_assert(sizeof size == 8, "wrong size align");
 static void setSize() {
     gtk_window_move(GTK_WINDOW(top), size.x, size.y);
     gtk_window_resize(GTK_WINDOW(top), size.width, size.height);
-    // gtk_widget_show(top);
 }
 
 static void commandSize(pipe_buffer *target) { parameters_to_call(target, &size, sizeof size, setSize); }

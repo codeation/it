@@ -39,6 +39,9 @@ void layout_create(int id, int parent_id) {
 void layout_destroy(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
+    if (id == 1) {
+        layout_signal_disconnect(l->layout);
+    }
     gtk_widget_destroy(GTK_WIDGET(l->layout));
     g_free(l);
 }

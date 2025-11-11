@@ -1,3 +1,4 @@
+#include "glib-object.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 #include <math.h>
@@ -46,7 +47,7 @@ static void write_configure_event_once(configure_event *e) {
     pipe_event_flush();
 }
 
-static void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, void *data) {
+static void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer data) {
     layoutOffsetX = allocation->x;
     layoutOffsetY = allocation->y;
     gint width, height;
@@ -201,7 +202,7 @@ void request_clipboard(int clipboardtypeid) {
 
 // Clipboard funcs
 
-void set_clipboard(int clipboardtypeid, void *data) {
+void set_clipboard(int clipboardtypeid, gpointer data) {
     GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     gtk_clipboard_set_text(clipboard, data, -1); // TODO text only
 }
@@ -217,6 +218,18 @@ void top_signal_connect() {
     g_signal_connect(top, "scroll-event", G_CALLBACK(s_scroll), NULL);
 }
 
+void top_signal_disconnect() {
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(on_delete), NULL);
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(s_keypress), NULL);
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(s_button), NULL);
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(s_motion), NULL);
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(s_scroll), NULL);
+}
+
 void layout_signal_connect(GtkWidget *layout) {
     g_signal_connect(layout, "size-allocate", G_CALLBACK(on_size_allocate), NULL);
+}
+
+void layout_signal_disconnect(GtkWidget *layout) {
+    g_signal_handlers_disconnect_by_func(layout, G_CALLBACK(on_size_allocate), NULL);
 }

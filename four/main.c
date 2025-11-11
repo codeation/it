@@ -19,11 +19,7 @@ static void on_app_activate(GApplication *application, gpointer data) {
     pipe_init(pipe_suffix);
 }
 
-static void on_app_shutdown(GApplication *application, gpointer data) {
-    pipe_done();
-    // gtk_window_destroy(GTK_WINDOW(top));
-    // g_application_quit(G_APPLICATION(app));
-}
+static void on_app_shutdown(GApplication *application, gpointer data) { pipe_done(); }
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -42,6 +38,10 @@ int main(int argc, char **argv) {
     g_signal_connect(app, "shutdown", G_CALLBACK(on_app_shutdown), NULL);
 
     int status = g_application_run(G_APPLICATION(app), 1, argv);
+
+    g_signal_handlers_disconnect_by_func(app, G_CALLBACK(on_app_activate), NULL);
+    g_signal_handlers_disconnect_by_func(app, G_CALLBACK(on_app_shutdown), NULL);
+
     g_object_unref(app);
     return status;
 }
