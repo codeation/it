@@ -47,9 +47,9 @@ static void write_configure_event_once(configure_event *e) {
 }
 
 static int idle_count = 0;
-static GtkWidget *inner_size_widget = NULL;
 
 static void on_configure_event(gpointer data) {
+    GtkWidget *inner_size_widget = data;
     int inner_width = gtk_widget_get_width(inner_size_widget);
     int inner_height = gtk_widget_get_height(inner_size_widget);
     if (inner_width == 0 && inner_height == 0) {
@@ -177,6 +177,7 @@ static void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdou
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
+    layout_main_grab_focus();
 }
 
 typedef struct {
@@ -236,6 +237,7 @@ void s_menu_action(char *action) {
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write_string(action);
     pipe_event_flush();
+    layout_main_grab_focus();
 }
 
 // Clipboard events
@@ -285,11 +287,10 @@ static GtkEventController *motionEventController;
 static GtkEventController *scrollEventController;
 
 void layout_signal_connect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
-    inner_size_widget = scrolled;
-    g_signal_connect(top, "notify::default-width", G_CALLBACK(size_notify), NULL);
-    g_signal_connect(top, "notify::default-height", G_CALLBACK(size_notify), NULL);
-    g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_notify), NULL);
-    g_signal_connect(adjustment, "value-changed", G_CALLBACK(adjustment_notify), NULL);
+    g_signal_connect(top, "notify::default-width", G_CALLBACK(size_notify), scrolled);
+    g_signal_connect(top, "notify::default-height", G_CALLBACK(size_notify), scrolled);
+    g_signal_connect(adjustment, "changed", G_CALLBACK(adjustment_notify), scrolled);
+    g_signal_connect(adjustment, "value-changed", G_CALLBACK(adjustment_notify), scrolled);
 
     keyEventController = gtk_event_controller_key_new();
     g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);

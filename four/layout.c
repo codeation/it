@@ -133,3 +133,8 @@ void layout_raise(int id) {
         layout_node_raise(id);
     }
 }
+
+void layout_main_grab_focus() {
+    layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(1));
+    gtk_widget_grab_focus(l->scrolled);
+}

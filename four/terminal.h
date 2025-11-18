@@ -54,6 +54,7 @@ void layout_create(int id, int parent_id);
 void layout_destroy(int id);
 void layout_raise(int id);
 void layout_size(int id, int x, int y, int width, int height);
+void layout_main_grab_focus();
 
 GtkWidget *layout_get_widget(int id);
 
