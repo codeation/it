@@ -10,8 +10,6 @@ extern char *it_api_version;
 extern GtkApplication *app;
 extern GtkWidget *top;
 
-extern GMenu *barmenu;
-
 // network
 
 void pipe_init(char *pipe_suffix);
@@ -94,6 +92,7 @@ void elem_draw_destroy(gpointer e);
 
 // menu
 
+void menubar_create();
 void menu_node_add(int id, int parent, char *label);
 void menu_item_add(int id, int parent, char *label, char *action);
 
