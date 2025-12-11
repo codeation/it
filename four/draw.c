@@ -20,23 +20,23 @@ typedef struct {
     double r, g, b, a;
 } fill_elem;
 
-void elem_fill_draw(cairo_t *cr, fill_elem *e) {
+static inline void elem_fill_draw(cairo_t *cr, fill_elem *e) {
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_rectangle(cr, e->x, e->y, e->width, e->height);
     cairo_fill(cr);
 }
 
-void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a) {
+void elem_fill_add(int id, double x, double y, double width, double height, double r, double g, double b, double a) {
     fill_elem *e = g_malloc(sizeof(fill_elem));
     e->type = DRAW_ELEM_FILL;
     e->x = x;
     e->y = y;
     e->width = width;
     e->height = height;
-    e->r = (double)r / (double)0xFFFF;
-    e->g = (double)g / (double)0xFFFF;
-    e->b = (double)b / (double)0xFFFF;
-    e->a = (double)a / (double)0xFFFF;
+    e->r = r;
+    e->g = g;
+    e->b = b;
+    e->a = a;
     window_add_draw(id, e);
 }
 
@@ -48,7 +48,7 @@ typedef struct {
     double r, g, b, a;
 } line_elem;
 
-void elem_line_draw(cairo_t *cr, line_elem *e) {
+static inline void elem_line_draw(cairo_t *cr, line_elem *e) {
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_set_line_width(cr, 1);
     cairo_move_to(cr, e->x0, e->y0);
@@ -56,24 +56,24 @@ void elem_line_draw(cairo_t *cr, line_elem *e) {
     cairo_stroke(cr);
 }
 
-void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a) {
+void elem_line_add(int id, double x0, double y0, double x1, double y1, double r, double g, double b, double a) {
+    if (x0 == x1) {
+        x0 += 0.5;
+        x1 += 0.5;
+    } else if (y0 == y1) {
+        y0 += 0.5;
+        y1 += 0.5;
+    }
     line_elem *e = g_malloc(sizeof(line_elem));
     e->type = DRAW_ELEM_LINE;
     e->x0 = x0;
     e->y0 = y0;
     e->x1 = x1;
     e->y1 = y1;
-    if (x0 == x1) {
-        e->x0 += 0.5;
-        e->x1 += 0.5;
-    } else if (y0 == y1) {
-        e->y0 += 0.5;
-        e->y1 += 0.5;
-    }
-    e->r = (double)r / (double)0xFFFF;
-    e->g = (double)g / (double)0xFFFF;
-    e->b = (double)b / (double)0xFFFF;
-    e->a = (double)a / (double)0xFFFF;
+    e->r = r;
+    e->g = g;
+    e->b = b;
+    e->a = a;
     window_add_draw(id, e);
 }
 
@@ -92,14 +92,12 @@ void bitmap_add(int id, int width, int height, unsigned char *data) {
     int stride = cairo_format_stride_for_width(cairo_format, width);
     unsigned char *row = data;
     for (int i = 0; i < height; i++) {
-        unsigned char *p0 = row;
-        unsigned char *p2 = p0 + 2;
+        unsigned char *p = row;
         for (int j = 0; j < width; j++) {
-            unsigned char r = *p0;
-            *p0 = *p2;
-            *p2 = r;
-            p0 += 4;
-            p2 += 4;
+            unsigned char r = p[0];
+            p[0] = p[2];
+            p[2] = r;
+            p += 4;
         }
         row += stride;
     }
@@ -131,20 +129,20 @@ typedef struct {
     cairo_surface_t *bitmap;
 } image_elem;
 
-void elem_image_draw(cairo_t *cr, image_elem *e) {
+static inline void elem_image_draw(cairo_t *cr, image_elem *e) {
     cairo_surface_set_device_scale(e->bitmap, e->scale_x, e->scale_y);
     cairo_set_source_surface(cr, e->bitmap, e->x, e->y);
     cairo_paint(cr);
 }
 
-void elem_image_add(int id, int x, int y, int width, int height, int imageid) {
+void elem_image_add(int id, double x, double y, double width, double height, int imageid) {
     image_elem *e = g_malloc(sizeof(image_elem));
     bitmap_elem *b = g_hash_table_lookup(bitmap_table, GINT_TO_POINTER(imageid));
     e->type = DRAW_ELEM_IMAGE;
     e->x = x;
     e->y = y;
-    e->scale_x = b->width / (double)width;
-    e->scale_y = b->height / (double)height;
+    e->scale_x = b->width / width;
+    e->scale_y = b->height / height;
     e->bitmap = b->bitmap;
     window_add_draw(id, e);
 }
@@ -248,16 +246,16 @@ typedef struct {
     double r, g, b, a;
 } text_elem;
 
-void elem_text_draw(cairo_t *cr, text_elem *e) {
+static inline void elem_text_draw(cairo_t *cr, text_elem *e) {
     pango_layout_set_text(e->layout, e->text, -1);
     cairo_set_source_rgba(cr, e->r, e->g, e->b, e->a);
     cairo_move_to(cr, e->x, e->y);
     pango_cairo_show_layout(cr, e->layout);
 }
 
-void elem_text_destroy(text_elem *e) { g_free(e->text); }
+static inline void elem_text_destroy(text_elem *e) { g_free(e->text); }
 
-void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a) {
+void elem_text_add(int id, double x, double y, char *text, int fontid, double r, double g, double b, double a) {
     font_elem *f = g_hash_table_lookup(font_table, GINT_TO_POINTER(fontid));
     text_elem *e = g_malloc(sizeof(text_elem));
     e->type = DRAW_ELEM_TEXT;
@@ -265,10 +263,10 @@ void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, i
     e->y = y;
     e->text = text;
     e->layout = f->layout;
-    e->r = (double)r / (double)0xFFFF;
-    e->g = (double)g / (double)0xFFFF;
-    e->b = (double)b / (double)0xFFFF;
-    e->a = (double)a / (double)0xFFFF;
+    e->r = r;
+    e->g = g;
+    e->b = b;
+    e->a = a;
     window_add_draw(id, e);
 }
 

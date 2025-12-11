@@ -1,6 +1,8 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
+static inline double dc(double c) { return c / 0xFFFF.0p0; }
+
 // driver version
 
 static void commandVersion() {
@@ -51,7 +53,7 @@ static struct {
 _Static_assert(sizeof fill == 18, "wrong fill align");
 
 static void setFill() {
-    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, fill.r, fill.g, fill.b, fill.a);
+    elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, dc(fill.r), dc(fill.g), dc(fill.b), dc(fill.a));
 }
 
 static void commandFill(pipe_buffer *target) { parameters_to_call(target, &fill, sizeof fill, setFill); }
@@ -67,7 +69,9 @@ static struct {
 
 _Static_assert(sizeof line == 18, "wrong line align");
 
-static void setLine() { elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, line.r, line.g, line.b, line.a); }
+static void setLine() {
+    elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, dc(line.r), dc(line.g), dc(line.b), dc(line.a));
+}
 
 static void commandLine(pipe_buffer *target) { parameters_to_call(target, &line, sizeof line, setLine); }
 
@@ -83,7 +87,7 @@ static struct {
 _Static_assert(sizeof point == 16, "wrong point align");
 
 static void setText(void *text) {
-    elem_text_add(point.id, point.x, point.y, text, point.fontid, point.r, point.g, point.b, point.a);
+    elem_text_add(point.id, point.x, point.y, text, point.fontid, dc(point.r), dc(point.g), dc(point.b), dc(point.a));
     // g_free(text) in elem_text_destroy
 }
 

@@ -81,10 +81,10 @@ void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height);
 
 // draw
 
-void elem_fill_add(int id, int x, int y, int width, int height, int r, int g, int b, int a);
-void elem_line_add(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a);
-void elem_image_add(int id, int x, int y, int width, int height, int imageid);
-void elem_text_add(int id, int x, int y, char *text, int fontid, int r, int g, int b, int a);
+void elem_fill_add(int id, double x, double y, double width, double height, double r, double g, double b, double a);
+void elem_line_add(int id, double x0, double y0, double x1, double y1, double r, double g, double b, double a);
+void elem_image_add(int id, double x, double y, double width, double height, int imageid);
+void elem_text_add(int id, double x, double y, char *text, int fontid, double r, double g, double b, double a);
 
 void draw_any_elem(gpointer e, gpointer cr);
 void elem_draw_destroy(gpointer e);
