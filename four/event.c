@@ -250,6 +250,9 @@ _Static_assert(sizeof(clipboard_event) == 2, "wrong clipboard_event align");
 
 static void clipboard_text_received(GObject *source_object, GAsyncResult *res, gpointer data) {
     char *text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source_object), res, NULL);
+    if (text == NULL) {
+        return;
+    }
     char command_type = 'c';
     clipboard_event e;
     e.format = 1;
@@ -314,8 +317,8 @@ void layout_signal_connect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
 }
 
 void layout_signal_disconnect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
-    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(size_notify), NULL);
-    g_signal_handlers_disconnect_by_func(adjustment, G_CALLBACK(adjustment_notify), NULL);
+    g_signal_handlers_disconnect_by_func(top, G_CALLBACK(size_notify), scrolled);
+    g_signal_handlers_disconnect_by_func(adjustment, G_CALLBACK(adjustment_notify), scrolled);
 
     g_signal_handlers_disconnect_by_func(keyEventController, G_CALLBACK(key_pressed), NULL);
 
