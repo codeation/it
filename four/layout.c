@@ -1,4 +1,3 @@
-#include "glib-object.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 
@@ -13,6 +12,7 @@ typedef struct {
 
 static GtkWidget *layout_main_get_widget(int id) {
     layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     return l->layout;
 }
 
@@ -41,6 +41,7 @@ static void layout_main_create(int id) {
 
 static void layout_main_destroy(int id) {
     layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     layout_signal_disconnect(l->scrolled, l->adjustment);
     gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
@@ -58,6 +59,7 @@ typedef struct {
 
 static GtkWidget *layout_node_get_widget(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     return l->layout;
 }
 
@@ -75,6 +77,7 @@ static void layout_node_create(int id, int parent_id) {
 
 static void layout_node_destroy(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
     g_free(l);
@@ -82,6 +85,7 @@ static void layout_node_destroy(int id) {
 
 static void layout_node_size(int id, int x, int y, int width, int height) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     l->x = x;
     l->y = y;
     gtk_fixed_move(GTK_FIXED(l->parent), l->layout, x, y);
@@ -90,6 +94,7 @@ static void layout_node_size(int id, int x, int y, int width, int height) {
 
 static void layout_node_raise(int id) {
     layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    g_assert(l);
     g_object_ref(l->layout);
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
     gtk_fixed_put(GTK_FIXED(l->parent), l->layout, l->x, l->y);
@@ -136,5 +141,6 @@ void layout_raise(int id) {
 
 void layout_main_grab_focus() {
     layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(1));
+    g_assert(l);
     gtk_widget_grab_focus(l->scrolled);
 }
