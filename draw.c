@@ -249,7 +249,14 @@ int16_t *font_metric_split_text(int fontid, char *text, int edge, int indent) {
         PangoLayoutLine *line = e->data;
         *pos++ = (int16_t)(line->length);
     }
+#ifdef PANGO_AVAILABLE_ENUMERATOR_IN_1_56
     pango_layout_set_wrap(f->layout, PANGO_WRAP_NONE);
+#else
+    static char *zero = "\0";
+    pango_layout_set_text(f->layout, zero, 0);
+    pango_layout_set_width(f->layout, -1);
+    pango_layout_set_indent(f->layout, 0);
+#endif
     return out;
 }
 
