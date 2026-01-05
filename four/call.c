@@ -13,8 +13,7 @@ static void commandVersion() {
 // exit
 
 static void commandExit(pipe_buffer *target) {
-    static int exitCount = 0;
-    if (exitCount++ == 0) {
+    if (!is_sync_pipe_buffer(target)) {
         top_signal_disconnect();
     }
     io_stop(target);
@@ -148,8 +147,13 @@ static struct {
 
 _Static_assert(sizeof font == 12, "wrong font align");
 
-static void setFont(void *family) {
+static void setFontElem(void *family) {
     font_elem_add(font.id, font.height, family, font.style, font.variant, font.weight, font.stretch);
+    g_free(family);
+}
+
+static void setFontMetric(void *family) {
+    font_metric_add(font.id, font.height, family, font.style, font.variant, font.weight, font.stretch);
     int16_t lineheight, baseline, ascent, descent;
     get_font_metrics(font.id, &lineheight, &baseline, &ascent, &descent);
     pipe_output_write(&lineheight, sizeof lineheight);
@@ -160,7 +164,13 @@ static void setFont(void *family) {
     g_free(family);
 }
 
-static void commandFont(pipe_buffer *target) { parameters_alloc_to_call(target, &font, sizeof font, setFont); }
+static void commandFont(pipe_buffer *target) {
+    if (is_sync_pipe_buffer(target)) {
+        parameters_alloc_to_call(target, &font, sizeof font, setFontMetric);
+    } else {
+        parameters_alloc_to_call(target, &font, sizeof font, setFontElem);
+    }
+}
 
 // remove font
 
@@ -170,9 +180,17 @@ static struct {
 
 _Static_assert(sizeof fontid == 2, "wrong fontid align");
 
-static void setFontRem() { font_elem_rem(fontid.id); }
+static void setFontElemRem() { font_elem_rem(fontid.id); }
 
-static void commandFontRem(pipe_buffer *target) { parameters_to_call(target, &fontid, sizeof fontid, setFontRem); }
+static void setFontMetricRem() { font_metric_rem(fontid.id); }
+
+static void commandFontRem(pipe_buffer *target) {
+    if (is_sync_pipe_buffer(target)) {
+        parameters_to_call(target, &fontid, sizeof fontid, setFontMetricRem);
+    } else {
+        parameters_to_call(target, &fontid, sizeof fontid, setFontElemRem);
+    }
+}
 
 // split text
 
@@ -185,7 +203,7 @@ static struct {
 _Static_assert(sizeof split == 6, "wrong split align");
 
 static void splitText(void *text) {
-    int16_t *out = font_split_text(split.fontid, text, split.edge, split.indent);
+    int16_t *out = font_metric_split_text(split.fontid, text, split.edge, split.indent);
     if (out == NULL) {
         int16_t value = 0;
         pipe_output_write(&value, sizeof value);
@@ -209,7 +227,7 @@ static struct {
 
 static void rectText(void *text) {
     int16_t width, height;
-    font_rect_text(textrect.fontid, text, &width, &height);
+    font_metric_rect_text(textrect.fontid, text, &width, &height);
     pipe_output_write(&width, sizeof width);
     pipe_output_write(&height, sizeof width);
     pipe_output_flush();

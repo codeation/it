@@ -24,6 +24,7 @@ void pipe_event_flush();
 // io
 
 typedef struct _pipe_buffer pipe_buffer;
+gboolean is_sync_pipe_buffer(pipe_buffer *target);
 void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)());
 void parameters_alloc_to_call(pipe_buffer *target, void *buffer, int size, void (*f)(void *));
 void io_input_start(FILE *source);
@@ -72,13 +73,18 @@ void window_add_draw(int id, gpointer e);
 void bitmap_add(int id, int width, int height, unsigned char *data);
 void bitmap_rem(int id);
 
-// font
+// font (draw)
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch);
 void font_elem_rem(int id);
+
+// font (metrics)
+
+void font_metric_add(int id, int height, char *family, int style, int variant, int weight, int stretch);
+void font_metric_rem(int id);
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent);
-int16_t *font_split_text(int fontid, char *text, int edge, int indent);
-void font_rect_text(int fontid, char *text, int16_t *width, int16_t *height);
+int16_t *font_metric_split_text(int fontid, char *text, int edge, int indent);
+void font_metric_rect_text(int fontid, char *text, int16_t *width, int16_t *height);
 
 // draw
 

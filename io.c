@@ -16,6 +16,8 @@ typedef struct _pipe_buffer {
 
 static pipe_buffer sync_chan, stream_chan;
 
+gboolean is_sync_pipe_buffer(pipe_buffer *target) { return target == &sync_chan; }
+
 static void reset_buffer(pipe_buffer *target);
 
 static void call_func(pipe_buffer *target) {
