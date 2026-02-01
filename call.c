@@ -12,8 +12,8 @@ static void commandVersion() {
 
 // exit
 
-static void commandExit(pipe_buffer *target) {
-    if (!is_sync_pipe_buffer(target)) {
+static void commandExit(PipeBuffer *target) {
+    if (!io_is_sync(target)) {
         top_signal_disconnect();
     }
     io_stop(target);
@@ -33,13 +33,13 @@ _Static_assert(sizeof windowid == 2, "wrong windowid align");
 
 static void setClear() { window_clear(windowid.id); }
 
-static void commandClear(pipe_buffer *target) { parameters_to_call(target, &windowid, sizeof windowid, setClear); }
+static void commandClear(PipeBuffer *target) { io_buffer_call(target, &windowid, sizeof windowid, setClear); }
 
 // show command
 
 static void setShow() { window_redraw(windowid.id); }
 
-static void commandShow(pipe_buffer *target) { parameters_to_call(target, &windowid, sizeof windowid, setShow); }
+static void commandShow(PipeBuffer *target) { io_buffer_call(target, &windowid, sizeof windowid, setShow); }
 
 // fill command
 
@@ -55,7 +55,7 @@ static void setFill() {
     elem_fill_add(fill.id, fill.x, fill.y, fill.width, fill.height, dc(fill.r), dc(fill.g), dc(fill.b), dc(fill.a));
 }
 
-static void commandFill(pipe_buffer *target) { parameters_to_call(target, &fill, sizeof fill, setFill); }
+static void commandFill(PipeBuffer *target) { io_buffer_call(target, &fill, sizeof fill, setFill); }
 
 // draw line
 
@@ -72,7 +72,7 @@ static void setLine() {
     elem_line_add(line.id, line.x0, line.y0, line.x1, line.y1, dc(line.r), dc(line.g), dc(line.b), dc(line.a));
 }
 
-static void commandLine(pipe_buffer *target) { parameters_to_call(target, &line, sizeof line, setLine); }
+static void commandLine(PipeBuffer *target) { io_buffer_call(target, &line, sizeof line, setLine); }
 
 // draw string
 
@@ -90,7 +90,7 @@ static void setText(void *text) {
     // g_free(text) in elem_text_destroy
 }
 
-void commandText(pipe_buffer *target) { parameters_alloc_to_call(target, &point, sizeof point, setText); }
+void commandText(PipeBuffer *target) { io_buffer_malloc_call(target, &point, sizeof point, setText); }
 
 // draw image
 
@@ -105,7 +105,7 @@ _Static_assert(sizeof image == 12, "wrong image align");
 
 static void setImage() { elem_image_add(image.id, image.x, image.y, image.width, image.height, image.imageid); }
 
-static void commandImage(pipe_buffer *target) { parameters_to_call(target, &image, sizeof image, setImage); }
+static void commandImage(PipeBuffer *target) { io_buffer_call(target, &image, sizeof image, setImage); }
 
 // load image
 
@@ -121,8 +121,8 @@ static void setImageAdd(void *data) {
     // g_free(data) in image_rem
 }
 
-static void commandImageAdd(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &imageAdd, sizeof imageAdd, setImageAdd);
+static void commandImageAdd(PipeBuffer *target) {
+    io_buffer_malloc_call(target, &imageAdd, sizeof imageAdd, setImageAdd);
 }
 
 // remove image
@@ -135,7 +135,7 @@ _Static_assert(sizeof imageid == 2, "wrong imageid align");
 
 static void setImageRem() { bitmap_rem(imageid.id); }
 
-static void commandImageRem(pipe_buffer *target) { parameters_to_call(target, &imageid, sizeof imageid, setImageRem); }
+static void commandImageRem(PipeBuffer *target) { io_buffer_call(target, &imageid, sizeof imageid, setImageRem); }
 
 // load font
 
@@ -164,11 +164,11 @@ static void setFontMetric(void *family) {
     g_free(family);
 }
 
-static void commandFont(pipe_buffer *target) {
-    if (is_sync_pipe_buffer(target)) {
-        parameters_alloc_to_call(target, &font, sizeof font, setFontMetric);
+static void commandFont(PipeBuffer *target) {
+    if (io_is_sync(target)) {
+        io_buffer_malloc_call(target, &font, sizeof font, setFontMetric);
     } else {
-        parameters_alloc_to_call(target, &font, sizeof font, setFontElem);
+        io_buffer_malloc_call(target, &font, sizeof font, setFontElem);
     }
 }
 
@@ -184,11 +184,11 @@ static void setFontElemRem() { font_elem_rem(fontid.id); }
 
 static void setFontMetricRem() { font_metric_rem(fontid.id); }
 
-static void commandFontRem(pipe_buffer *target) {
-    if (is_sync_pipe_buffer(target)) {
-        parameters_to_call(target, &fontid, sizeof fontid, setFontMetricRem);
+static void commandFontRem(PipeBuffer *target) {
+    if (io_is_sync(target)) {
+        io_buffer_call(target, &fontid, sizeof fontid, setFontMetricRem);
     } else {
-        parameters_to_call(target, &fontid, sizeof fontid, setFontElemRem);
+        io_buffer_call(target, &fontid, sizeof fontid, setFontElemRem);
     }
 }
 
@@ -217,7 +217,7 @@ static void splitText(void *text) {
     g_free(text);
 }
 
-static void commandSplit(pipe_buffer *target) { parameters_alloc_to_call(target, &split, sizeof split, splitText); }
+static void commandSplit(PipeBuffer *target) { io_buffer_malloc_call(target, &split, sizeof split, splitText); }
 
 // text rect
 
@@ -236,9 +236,7 @@ static void rectText(void *text) {
 
 _Static_assert(sizeof textrect == 2, "wrong textrect align");
 
-static void commandRect(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &textrect, sizeof textrect, rectText);
-}
+static void commandRect(PipeBuffer *target) { io_buffer_malloc_call(target, &textrect, sizeof textrect, rectText); }
 
 // app window size
 
@@ -254,7 +252,7 @@ static void setSize() {
     gtk_window_resize(GTK_WINDOW(top), size.width, size.height);
 }
 
-static void commandSize(pipe_buffer *target) { parameters_to_call(target, &size, sizeof size, setSize); }
+static void commandSize(PipeBuffer *target) { io_buffer_call(target, &size, sizeof size, setSize); }
 
 // app window title
 
@@ -263,7 +261,7 @@ static void setTitle(void *title) {
     g_free(title);
 }
 
-static void commandTitle(pipe_buffer *target) { parameters_alloc_to_call(target, NULL, 0, setTitle); }
+static void commandTitle(PipeBuffer *target) { io_buffer_malloc_call(target, NULL, 0, setTitle); }
 
 // layout
 
@@ -281,7 +279,7 @@ static void setLayout() {
     layout_size(layout.id, layout.x, layout.y, layout.width, layout.height);
 }
 
-static void commandLayout(pipe_buffer *target) { parameters_to_call(target, &layout, sizeof layout, setLayout); }
+static void commandLayout(PipeBuffer *target) { io_buffer_call(target, &layout, sizeof layout, setLayout); }
 
 // layout drop
 
@@ -291,9 +289,7 @@ static struct {
 
 static void dropLayout() { layout_destroy(layoutid.id); }
 
-static void commandLayoutDrop(pipe_buffer *target) {
-    parameters_to_call(target, &layoutid, sizeof layoutid, dropLayout);
-}
+static void commandLayoutDrop(PipeBuffer *target) { io_buffer_call(target, &layoutid, sizeof layoutid, dropLayout); }
 
 // layout size
 
@@ -309,17 +305,15 @@ static void sizeLayout() {
     layout_size(layoutSize.id, layoutSize.x, layoutSize.y, layoutSize.width, layoutSize.height);
 }
 
-static void commandLayoutSize(pipe_buffer *target) {
-    parameters_to_call(target, &layoutSize, sizeof layoutSize, sizeLayout);
+static void commandLayoutSize(PipeBuffer *target) {
+    io_buffer_call(target, &layoutSize, sizeof layoutSize, sizeLayout);
 }
 
 // layout raise
 
 static void raiseLayout() { layout_raise(layoutid.id); }
 
-static void commandLayoutRaise(pipe_buffer *target) {
-    parameters_to_call(target, &layoutid, sizeof layoutid, raiseLayout);
-}
+static void commandLayoutRaise(PipeBuffer *target) { io_buffer_call(target, &layoutid, sizeof layoutid, raiseLayout); }
 
 // window
 
@@ -337,7 +331,7 @@ static void setWindow() {
     window_size(window.id, window.x, window.y, window.width, window.height);
 }
 
-static void commandWindow(pipe_buffer *target) { parameters_to_call(target, &window, sizeof window, setWindow); }
+static void commandWindow(PipeBuffer *target) { io_buffer_call(target, &window, sizeof window, setWindow); }
 
 // window size
 
@@ -353,25 +347,21 @@ static void setWindowSize() {
     window_size(windowSize.id, windowSize.x, windowSize.y, windowSize.width, windowSize.height);
 }
 
-static void commandWindowSize(pipe_buffer *target) {
-    parameters_to_call(target, &windowSize, sizeof windowSize, setWindowSize);
+static void commandWindowSize(PipeBuffer *target) {
+    io_buffer_call(target, &windowSize, sizeof windowSize, setWindowSize);
 }
 
 // drop window command
 
 static void dropWindow() { window_destroy(windowid.id); }
 
-static void commandWindowDrop(pipe_buffer *target) {
-    parameters_to_call(target, &windowid, sizeof windowid, dropWindow);
-}
+static void commandWindowDrop(PipeBuffer *target) { io_buffer_call(target, &windowid, sizeof windowid, dropWindow); }
 
 // window raise
 
 static void raiseWindow() { window_raise(windowid.id); }
 
-static void commandWindowRaise(pipe_buffer *target) {
-    parameters_to_call(target, &windowid, sizeof windowid, raiseWindow);
-}
+static void commandWindowRaise(PipeBuffer *target) { io_buffer_call(target, &windowid, sizeof windowid, raiseWindow); }
 
 // menu node
 
@@ -387,12 +377,12 @@ static void addMenu(void *label) {
     // g_free(label) is eternal
 }
 
-static void commandMenu(pipe_buffer *target) { parameters_alloc_to_call(target, &menu, sizeof menu, addMenu); }
+static void commandMenu(PipeBuffer *target) { io_buffer_malloc_call(target, &menu, sizeof menu, addMenu); }
 
 // menu item
 
 static char *menuItemLabel = NULL;
-static pipe_buffer *menu_target = NULL;
+static PipeBuffer *menu_target = NULL;
 
 static void addMenuItem(void *action) {
     menu_item_add(menu.id, menu.parent, menuItemLabel, action);
@@ -402,12 +392,12 @@ static void addMenuItem(void *action) {
 
 static void setMenuItem(void *label) {
     menuItemLabel = label;
-    parameters_alloc_to_call(menu_target, NULL, 0, addMenuItem);
+    io_buffer_malloc_call(menu_target, NULL, 0, addMenuItem);
 }
 
-static void commandMenuItem(pipe_buffer *target) {
+static void commandMenuItem(PipeBuffer *target) {
     menu_target = target;
-    parameters_alloc_to_call(target, &menu, sizeof menu, setMenuItem);
+    io_buffer_malloc_call(target, &menu, sizeof menu, setMenuItem);
 }
 
 // clipboard
@@ -420,8 +410,8 @@ _Static_assert(sizeof clipboardtypeid == 2, "wrong copy align");
 
 static void clipboardGet() { request_clipboard(clipboardtypeid.id); }
 
-static void commandClipboardGet(pipe_buffer *target) {
-    parameters_to_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardGet);
+static void commandClipboardGet(PipeBuffer *target) {
+    io_buffer_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardGet);
 }
 
 static void clipboardPut(void *data) {
@@ -429,13 +419,13 @@ static void clipboardPut(void *data) {
     g_free(data);
 }
 
-static void commandClipboardPut(pipe_buffer *target) {
-    parameters_alloc_to_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardPut);
+static void commandClipboardPut(PipeBuffer *target) {
+    io_buffer_malloc_call(target, &clipboardtypeid, sizeof clipboardtypeid, clipboardPut);
 }
 
 // dispatch
 
-void callcommand(char command, pipe_buffer *target) {
+void callcommand(char command, PipeBuffer *target) {
     switch (command) {
     // application
     case 'S':

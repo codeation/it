@@ -23,13 +23,13 @@ void pipe_event_flush();
 
 // io
 
-typedef struct _pipe_buffer pipe_buffer;
-gboolean is_sync_pipe_buffer(pipe_buffer *target);
-void parameters_to_call(pipe_buffer *target, void *buffer, int size, void (*f)());
-void parameters_alloc_to_call(pipe_buffer *target, void *buffer, int size, void (*f)(void *));
+typedef struct _PipeBuffer PipeBuffer;
+gboolean io_is_sync(PipeBuffer *target);
+void io_buffer_call(PipeBuffer *target, void *buffer, int size, void (*call_func)());
+void io_buffer_malloc_call(PipeBuffer *target, void *buffer, int size, void (*data_func)(gpointer data));
 void io_input_start(FILE *source);
 void io_stream_start(FILE *source);
-void io_stop(pipe_buffer *target);
+void io_stop(PipeBuffer *target);
 gboolean io_exited();
 
 // event
@@ -45,7 +45,7 @@ void set_clipboard(int clipboardtypeid, void *data);
 
 // call
 
-void callcommand(char command, pipe_buffer *target);
+void callcommand(char command, PipeBuffer *target);
 
 // layout
 
