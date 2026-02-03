@@ -9,15 +9,15 @@ static int layoutOffsetX = 0, layoutOffsetY = 0;
 
 typedef struct {
     uint32_t id;
-} general_event;
+} GeneralEvent;
 
-_Static_assert(sizeof(general_event) == 4, "wrong general_event align");
+_Static_assert(sizeof(GeneralEvent) == 4, "wrong GeneralEvent align");
 
 #define GENERAL_EVENT_DESTROY 1
 
 static gboolean on_delete(GtkWidget *widget, GdkEvent *event, gpointer data) {
     char command_type = 'g';
-    general_event e;
+    GeneralEvent e;
     e.id = GENERAL_EVENT_DESTROY;
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
@@ -28,11 +28,11 @@ static gboolean on_delete(GtkWidget *widget, GdkEvent *event, gpointer data) {
 typedef struct {
     uint16_t width, height;
     uint16_t inner_width, inner_height;
-} configure_event;
+} ConfigureEvent;
 
-_Static_assert(sizeof(configure_event) == 8, "wrong configure_event align");
+_Static_assert(sizeof(ConfigureEvent) == 8, "wrong ConfigureEvent align");
 
-static void write_configure_event_once(configure_event *e) {
+static void write_configure_event_once(ConfigureEvent *e) {
     static gint width = 0, height = 0, inner_width = 0, inner_height = 0;
     if (e->width == width && e->height == height && e->inner_width == inner_width && e->inner_height == inner_height) {
         return;
@@ -52,7 +52,7 @@ static void on_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpoin
     layoutOffsetY = allocation->y;
     gint width, height;
     gtk_window_get_size(GTK_WINDOW(top), &width, &height);
-    configure_event e;
+    ConfigureEvent e;
     e.width = width;
     e.height = height;
     e.inner_width = allocation->width;
@@ -68,13 +68,13 @@ typedef struct {
     uint8_t control;
     uint8_t alt;
     uint8_t meta;
-} keyboard_event;
+} KeyboardEvent;
 
-_Static_assert(sizeof(keyboard_event) == 8, "wrong keyboard_event align");
+_Static_assert(sizeof(KeyboardEvent) == 8, "wrong KeyboardEvent align");
 
 static gboolean s_keypress(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     char command_type = 'k';
-    keyboard_event e;
+    KeyboardEvent e;
     e.unicode = gdk_keyval_to_unicode(event->keyval);
     e.shift = event->state & GDK_SHIFT_MASK ? 1 : 0;
     e.control = event->state & GDK_CONTROL_MASK ? 1 : 0;
@@ -94,9 +94,9 @@ typedef struct {
     uint8_t type;
     uint8_t button;
     uint16_t x, y;
-} button_event;
+} ButtonEvent;
 
-_Static_assert(sizeof(button_event) == 6, "wrong button_event align");
+_Static_assert(sizeof(ButtonEvent) == 6, "wrong ButtonEvent align");
 
 static gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     static guint32 prev_time = 0;
@@ -105,7 +105,7 @@ static gboolean s_button(GtkWidget *widget, GdkEventButton *event, gpointer data
     }
     prev_time = event->time;
     char command_type = 'b';
-    button_event e;
+    ButtonEvent e;
     e.type = event->type;
     e.button = event->button;
     e.x = (int16_t)(lrint(event->x) - layoutOffsetX);
@@ -122,9 +122,9 @@ typedef struct {
     uint8_t control;
     uint8_t alt;
     uint8_t meta;
-} motion_event;
+} MotionEvent;
 
-_Static_assert(sizeof(motion_event) == 8, "wrong motion_event align");
+_Static_assert(sizeof(MotionEvent) == 8, "wrong MotionEvent align");
 
 static gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
     static guint32 prev_time = 0;
@@ -133,7 +133,7 @@ static gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data
     }
     prev_time = event->time;
     char command_type = 'm';
-    motion_event e;
+    MotionEvent e;
     e.x = (int16_t)(lrint(event->x) - layoutOffsetX);
     e.y = (int16_t)(lrint(event->y) - layoutOffsetY);
     e.shift = event->state & GDK_SHIFT_MASK ? 1 : 0;
@@ -149,13 +149,13 @@ static gboolean s_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data
 typedef struct {
     int16_t direction;
     int16_t delta_x, delta_y;
-} scroll_event;
+} ScrollEvent;
 
-_Static_assert(sizeof(scroll_event) == 6, "wrong scroll_event align");
+_Static_assert(sizeof(ScrollEvent) == 6, "wrong ScrollEvent align");
 
 static gboolean s_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
     char command_type = 's';
-    scroll_event e;
+    ScrollEvent e;
     e.direction = event->direction;
     e.delta_x = (int16_t)lrint(event->delta_x);
     e.delta_y = (int16_t)lrint(event->delta_y);
@@ -178,9 +178,9 @@ void s_menu_action(char *action) {
 
 typedef struct {
     int16_t format;
-} clipboard_event;
+} ClipboardEvent;
 
-_Static_assert(sizeof(clipboard_event) == 2, "wrong clipboard_event align");
+_Static_assert(sizeof(ClipboardEvent) == 2, "wrong ClipboardEvent align");
 
 static void s_text_received(GtkClipboard *clipboard, const gchar *text, gpointer data) {
     if (text == NULL) {
@@ -188,7 +188,7 @@ static void s_text_received(GtkClipboard *clipboard, const gchar *text, gpointer
     }
     char command_type = 'c';
     pipe_event_write(&command_type, sizeof command_type);
-    clipboard_event e;
+    ClipboardEvent e;
     e.format = 1;
     pipe_event_write(&e, sizeof e);
     pipe_event_write_string(text);

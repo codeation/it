@@ -6,7 +6,7 @@ typedef struct {
     GtkWidget *layout;
     int x, y;
     GPtrArray *draw_list;
-} window_elem;
+} WindowElem;
 
 static GHashTable *window_table = NULL;
 
@@ -18,7 +18,7 @@ static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer draw_list
 }
 
 void window_create(int id, int layout_id) {
-    window_elem *w = g_malloc(sizeof(window_elem));
+    WindowElem *w = g_malloc(sizeof(WindowElem));
     w->draw = gtk_drawing_area_new();
     w->layout = layout_get_widget(layout_id);
     w->x = 0;
@@ -34,7 +34,7 @@ void window_create(int id, int layout_id) {
 }
 
 void window_destroy(int id) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     g_hash_table_remove(window_table, GINT_TO_POINTER(id));
     g_ptr_array_free(w->draw_list, TRUE);
@@ -43,19 +43,19 @@ void window_destroy(int id) {
 }
 
 void window_clear(int id) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     g_ptr_array_remove_range(w->draw_list, 0, w->draw_list->len);
 }
 
 void window_add_draw(int id, gpointer e) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     g_ptr_array_add(w->draw_list, e);
 }
 
 void window_size(int id, int x, int y, int width, int height) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     w->x = x;
     w->y = y;
@@ -68,7 +68,7 @@ void window_size(int id, int x, int y, int width, int height) {
 }
 
 void window_raise(int id) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     g_object_ref(w->draw);
     gtk_container_remove(GTK_CONTAINER(w->layout), w->draw);
@@ -82,7 +82,7 @@ void window_raise(int id) {
 }
 
 void window_redraw(int id) {
-    window_elem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
+    WindowElem *w = g_hash_table_lookup(window_table, GINT_TO_POINTER(id));
     g_assert(w);
     gtk_widget_queue_draw(w->draw);
 }

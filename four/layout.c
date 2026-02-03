@@ -8,16 +8,16 @@ typedef struct {
     GtkWidget *parent;
     GtkWidget *scrolled;
     GtkAdjustment *adjustment;
-} layout_main;
+} LayoutMain;
 
 static GtkWidget *layout_main_get_widget(int id) {
-    layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     return l->layout;
 }
 
 static void layout_main_create(int id) {
-    layout_main *l = g_malloc(sizeof(layout_main));
+    LayoutMain *l = g_malloc(sizeof(LayoutMain));
     l->layout = gtk_fixed_new();
     gtk_widget_set_overflow(l->layout, GTK_OVERFLOW_VISIBLE);
     l->parent = top;
@@ -40,7 +40,7 @@ static void layout_main_create(int id) {
 }
 
 static void layout_main_destroy(int id) {
-    layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     layout_signal_disconnect(l->scrolled, l->adjustment);
@@ -55,16 +55,16 @@ typedef struct {
     GtkWidget *layout;
     GtkWidget *parent;
     int x, y;
-} layout_elem;
+} LayoutElem;
 
 static GtkWidget *layout_node_get_widget(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     return l->layout;
 }
 
 static void layout_node_create(int id, int parent_id) {
-    layout_elem *l = g_malloc(sizeof(layout_elem));
+    LayoutElem *l = g_malloc(sizeof(LayoutElem));
     l->layout = gtk_fixed_new();
     gtk_widget_set_overflow(l->layout, GTK_OVERFLOW_HIDDEN);
     l->parent = layout_get_widget(parent_id);
@@ -76,7 +76,7 @@ static void layout_node_create(int id, int parent_id) {
 }
 
 static void layout_node_destroy(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
@@ -84,7 +84,7 @@ static void layout_node_destroy(int id) {
 }
 
 static void layout_node_size(int id, int x, int y, int width, int height) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     l->x = x;
     l->y = y;
@@ -93,7 +93,7 @@ static void layout_node_size(int id, int x, int y, int width, int height) {
 }
 
 static void layout_node_raise(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     g_object_ref(l->layout);
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
@@ -140,7 +140,7 @@ void layout_raise(int id) {
 }
 
 void layout_main_grab_focus() {
-    layout_main *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(1));
+    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(1));
     g_assert(l);
     gtk_widget_grab_focus(l->scrolled);
 }

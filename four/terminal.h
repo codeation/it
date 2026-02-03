@@ -93,8 +93,8 @@ void elem_line_add(int id, double x0, double y0, double x1, double y1, double r,
 void elem_image_add(int id, double x, double y, double width, double height, int imageid);
 void elem_text_add(int id, double x, double y, char *text, int fontid, double r, double g, double b, double a);
 
-void draw_any_elem(gpointer e, gpointer cr);
-void elem_draw_destroy(gpointer e);
+void draw_any_elem(gpointer data, gpointer cr);
+void elem_draw_destroy(gpointer data);
 
 // menu
 

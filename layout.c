@@ -5,18 +5,18 @@ typedef struct {
     GtkWidget *layout;
     GtkWidget *parent;
     int x, y;
-} layout_elem;
+} LayoutElem;
 
 static GHashTable *layout_table = NULL;
 
 GtkWidget *layout_get_widget(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     return l->layout;
 }
 
 void layout_create(int id, int parent_id) {
-    layout_elem *l = g_malloc(sizeof(layout_elem));
+    LayoutElem *l = g_malloc(sizeof(LayoutElem));
     if (id == 1 && parent_id == 0) {
         l->layout = gtk_layout_new(NULL, NULL);
         l->parent = top;
@@ -38,7 +38,7 @@ void layout_create(int id, int parent_id) {
 }
 
 void layout_destroy(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
     if (id == 1) {
@@ -49,7 +49,7 @@ void layout_destroy(int id) {
 }
 
 void layout_size(int id, int x, int y, int width, int height) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     if (!GTK_IS_LAYOUT(l->layout)) {
         l->x = x;
@@ -64,7 +64,7 @@ void layout_size(int id, int x, int y, int width, int height) {
 }
 
 void layout_raise(int id) {
-    layout_elem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
     g_assert(l);
     if (!GTK_IS_LAYOUT(l->layout)) {
         g_object_ref(l->layout);
