@@ -1,4 +1,3 @@
-#include "glib-object.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
 

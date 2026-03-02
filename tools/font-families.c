@@ -1,9 +1,14 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 
-GtkApplication *app = NULL;
+#ifndef GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
+static GApplicationFlags app_flags = G_APPLICATION_FLAGS_NONE;
+#else
+static GApplicationFlags app_flags = G_APPLICATION_DEFAULT_FLAGS;
+#endif
 
 static void on_app_activate(GApplication *application, gpointer data) {
+    GtkApplication *app = data;
     GtkWidget *top = gtk_application_window_new(GTK_APPLICATION(app));
 
     PangoContext *context = gtk_widget_get_pango_context(GTK_WIDGET(top));
@@ -31,12 +36,8 @@ static void on_app_activate(GApplication *application, gpointer data) {
 }
 
 int main(int argc, char **argv) {
-#ifndef GLIB_DEPRECATED_ENUMERATOR_IN_2_74_FOR
-    app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
-#else
-    app = gtk_application_new(NULL, G_APPLICATION_DEFAULT_FLAGS);
-#endif
-    g_signal_connect(app, "activate", G_CALLBACK(on_app_activate), NULL);
+    GtkApplication *app = gtk_application_new(NULL, app_flags);
+    g_signal_connect(app, "activate", G_CALLBACK(on_app_activate), app);
     int status = g_application_run(G_APPLICATION(app), 1, argv);
     g_object_unref(app);
     return status;
