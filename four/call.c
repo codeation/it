@@ -1,7 +1,9 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
-static inline double dc(double c) { return c / 0xFFFF.0p0; }
+static const double color_scale = 1.0 / 0xFFFFu;
+
+static inline double dc(double c) { return c * color_scale; }
 
 // driver version
 

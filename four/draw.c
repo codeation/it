@@ -99,16 +99,14 @@ static GHashTable *bitmap_table = NULL;
 void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
     int stride = cairo_format_stride_for_width(cairo_format, width);
-    unsigned char *row = data;
+    int stride4 = stride / sizeof(uint32_t);
+    uint32_t *row = (uint32_t *)data;
     for (int i = 0; i < height; i++) {
-        unsigned char *p = row;
         for (int j = 0; j < width; j++) {
-            unsigned char r = p[0];
-            p[0] = p[2];
-            p[2] = r;
-            p += 4;
+            uint32_t p = row[j];
+            row[j] = (p & 0xFF00FF00) | ((p & 0x00FF0000) >> 16) | ((p & 0x000000FF) << 16);
         }
-        row += stride;
+        row += stride4;
     }
     BitmapElem *e = g_malloc(sizeof(BitmapElem));
     e->data = data;
