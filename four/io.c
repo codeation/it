@@ -121,9 +121,8 @@ static gboolean chan_error_func(GIOChannel *source, GIOCondition condition, gpoi
     return TRUE;
 }
 
-static void io_start(FILE *source, PipeBuffer *target, gboolean is_stream) {
+static void io_start(GIOChannel *chan, PipeBuffer *target, gboolean is_stream) {
     reset_buffer(target);
-    GIOChannel *chan = g_io_channel_unix_new(fileno(source));
     GIOStatus status = g_io_channel_set_flags(chan, G_IO_FLAG_NONBLOCK, NULL);
     if (status != G_IO_STATUS_NORMAL) {
         printf("set flag status: %d\n", status);
@@ -139,11 +138,10 @@ static void io_start(FILE *source, PipeBuffer *target, gboolean is_stream) {
     }
     target->in_id = g_io_add_watch(chan, G_IO_IN, async_read_chan, target);
     target->hup_id = g_io_add_watch(chan, G_IO_HUP, chan_error_func, target);
-    g_io_channel_unref(chan);
 }
 
-void io_input_start(FILE *source) { io_start(source, &sync_chan, FALSE); }
-void io_stream_start(FILE *source) { io_start(source, &stream_chan, TRUE); }
+void io_input_start(GIOChannel *chan) { io_start(chan, &sync_chan, FALSE); }
+void io_stream_start(GIOChannel *chan) { io_start(chan, &stream_chan, TRUE); }
 
 void io_stop(PipeBuffer *target) {
     g_source_remove(target->hup_id);

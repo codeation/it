@@ -27,8 +27,8 @@ typedef struct _PipeBuffer PipeBuffer;
 gboolean io_is_sync(PipeBuffer *target);
 void io_buffer_call(PipeBuffer *target, void *buffer, int size, void (*call_func)());
 void io_buffer_malloc_call(PipeBuffer *target, void *buffer, int size, void (*data_func)(gpointer data));
-void io_input_start(FILE *source);
-void io_stream_start(FILE *source);
+void io_input_start(GIOChannel *chan);
+void io_stream_start(GIOChannel *chan);
 void io_stop(PipeBuffer *target);
 gboolean io_exited();
 

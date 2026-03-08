@@ -6,17 +6,18 @@
 #define FIFO_OUTPUT_PATH "/tmp/it_fifo_output_"
 #define FIFO_EVENT_PATH "/tmp/it_fifo_event_"
 
-static FILE *handle_stream = NULL;
-static FILE *handle_input = NULL;
 static FILE *handle_output = NULL;
 static FILE *handle_event = NULL;
+
+static GIOChannel *chan_stream = NULL;
+static GIOChannel *chan_input = NULL;
 
 static FILE *pipe_open(char *name, char *suffix, char *filemode) {
     GString *buff = g_string_new(NULL);
     g_string_printf(buff, "%s%s", name, suffix);
     FILE *handle = fopen(buff->str, filemode);
     if (handle == NULL) {
-        perror("pipe failed");
+        perror("pipe open failed");
         exit(EXIT_FAILURE);
     }
     g_string_free(buff, TRUE);
@@ -30,18 +31,39 @@ static void pipe_close(FILE *handle) {
     }
 }
 
+static GIOChannel *chan_open(char *name, char *suffix, char *filemode) {
+    GString *buff = g_string_new(NULL);
+    g_string_printf(buff, "%s%s", name, suffix);
+    GIOChannel *chan = g_io_channel_new_file(buff->str, filemode, NULL);
+    if (chan == NULL) {
+        printf("channel open failed\n");
+        exit(EXIT_FAILURE);
+    }
+    g_string_free(buff, TRUE);
+    return chan;
+}
+
+static void chan_close(GIOChannel *chan) {
+    GIOStatus status = g_io_channel_shutdown(chan, FALSE, NULL);
+    if (status != G_IO_STATUS_NORMAL) {
+        printf("channel shutdown status: %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+    g_io_channel_unref(chan);
+}
+
 void pipe_init(char *pipe_suffix) {
     handle_output = pipe_open(FIFO_OUTPUT_PATH, pipe_suffix, "w");
     handle_event = pipe_open(FIFO_EVENT_PATH, pipe_suffix, "w");
-    handle_input = pipe_open(FIFO_INPUT_PATH, pipe_suffix, "r");
-    handle_stream = pipe_open(FIFO_STREAM_PATH, pipe_suffix, "r");
-    io_input_start(handle_input);
-    io_stream_start(handle_stream);
+    chan_input = chan_open(FIFO_INPUT_PATH, pipe_suffix, "r");
+    chan_stream = chan_open(FIFO_STREAM_PATH, pipe_suffix, "r");
+    io_input_start(chan_input);
+    io_stream_start(chan_stream);
 }
 
 void pipe_done() {
-    pipe_close(handle_input);
-    pipe_close(handle_stream);
+    chan_close(chan_input);
+    chan_close(chan_stream);
     pipe_close(handle_output);
     pipe_close(handle_event);
 }
