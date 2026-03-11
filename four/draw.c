@@ -98,15 +98,38 @@ typedef struct {
 
 static GPtrArray *bitmap_list = NULL;
 
+static inline uint32_t swap_colors(uint32_t p) {
+    return (p & 0xFF00FF00) | ((p & 0x00FF0000) >> 16) | ((p & 0x000000FF) << 16);
+}
+
 void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
     int stride = cairo_format_stride_for_width(cairo_format, width);
     int stride4 = stride / sizeof(uint32_t);
+    int width16 = width & 0x7FFFFFF0;
     uint32_t *row = (uint32_t *)data;
     for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            uint32_t p = row[j];
-            row[j] = (p & 0xFF00FF00) | ((p & 0x00FF0000) >> 16) | ((p & 0x000000FF) << 16);
+        int j = 0;
+        for (; j < width16; j += 16) {
+            row[j + 0x0] = swap_colors(row[j + 0x0]);
+            row[j + 0x1] = swap_colors(row[j + 0x1]);
+            row[j + 0x2] = swap_colors(row[j + 0x2]);
+            row[j + 0x3] = swap_colors(row[j + 0x3]);
+            row[j + 0x4] = swap_colors(row[j + 0x4]);
+            row[j + 0x5] = swap_colors(row[j + 0x5]);
+            row[j + 0x6] = swap_colors(row[j + 0x6]);
+            row[j + 0x7] = swap_colors(row[j + 0x7]);
+            row[j + 0x8] = swap_colors(row[j + 0x8]);
+            row[j + 0x9] = swap_colors(row[j + 0x9]);
+            row[j + 0xA] = swap_colors(row[j + 0xA]);
+            row[j + 0xB] = swap_colors(row[j + 0xB]);
+            row[j + 0xC] = swap_colors(row[j + 0xC]);
+            row[j + 0xD] = swap_colors(row[j + 0xD]);
+            row[j + 0xE] = swap_colors(row[j + 0xE]);
+            row[j + 0xF] = swap_colors(row[j + 0xF]);
+        }
+        for (; j < width; j++) {
+            row[j] = swap_colors(row[j]);
         }
         row += stride4;
     }
