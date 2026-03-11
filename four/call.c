@@ -231,7 +231,7 @@ static void rectText(void *text) {
     int16_t width, height;
     font_metric_rect_text(textrect.fontid, text, &width, &height);
     pipe_output_write(&width, sizeof width);
-    pipe_output_write(&height, sizeof width);
+    pipe_output_write(&height, sizeof height);
     pipe_output_flush();
     g_free(text);
 }
