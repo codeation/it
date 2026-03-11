@@ -1,6 +1,8 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
+#define PTR_ARRAY_DEFAULT 16
+
 // draw elem
 
 #define DRAW_ELEM_FILL 1
@@ -94,7 +96,7 @@ typedef struct {
     cairo_surface_t *bitmap;
 } BitmapElem;
 
-static GHashTable *bitmap_table = NULL;
+static GPtrArray *bitmap_list = NULL;
 
 void bitmap_add(int id, int width, int height, unsigned char *data) {
     int cairo_format = CAIRO_FORMAT_ARGB32;
@@ -113,16 +115,19 @@ void bitmap_add(int id, int width, int height, unsigned char *data) {
     e->width = width;
     e->height = height;
     e->bitmap = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
-    if (bitmap_table == NULL) {
-        bitmap_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    if (bitmap_list == NULL) {
+        bitmap_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     }
-    g_hash_table_insert(bitmap_table, GINT_TO_POINTER(id), e);
+    for (int i = bitmap_list->len; i <= id; i++) {
+        g_ptr_array_add(bitmap_list, NULL);
+    }
+    bitmap_list->pdata[id] = e;
 }
 
 void bitmap_rem(int id) {
-    BitmapElem *e = g_hash_table_lookup(bitmap_table, GINT_TO_POINTER(id));
+    BitmapElem *e = bitmap_list->pdata[id];
     g_assert(e);
-    g_hash_table_remove(bitmap_table, GINT_TO_POINTER(id));
+    bitmap_list->pdata[id] = NULL;
     cairo_surface_destroy(e->bitmap);
     g_free(e->data);
     g_free(e);
@@ -137,7 +142,7 @@ static inline void elem_image_draw(cairo_t *cr, DrawElem *e) {
 }
 
 void elem_image_add(int id, double x, double y, double width, double height, int imageid) {
-    BitmapElem *b = g_hash_table_lookup(bitmap_table, GINT_TO_POINTER(imageid));
+    BitmapElem *b = bitmap_list->pdata[imageid];
     g_assert(b);
     DrawElem *e = g_malloc(sizeof(DrawElem));
     e->type = DRAW_ELEM_IMAGE;
@@ -183,42 +188,48 @@ static void font_elem_free(FontElem *e) {
     g_free(e);
 }
 
-static GHashTable *font_elem_table = NULL;
+static GPtrArray *font_elem_list = NULL;
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     FontElem *e = font_elem_new(height, family, style, variant, weight, stretch);
-    if (font_elem_table == NULL) {
-        font_elem_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    if (font_elem_list == NULL) {
+        font_elem_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     }
-    g_hash_table_insert(font_elem_table, GINT_TO_POINTER(id), e);
+    for (int i = font_elem_list->len; i <= id; i++) {
+        g_ptr_array_add(font_elem_list, NULL);
+    }
+    font_elem_list->pdata[id] = e;
 }
 
 void font_elem_rem(int id) {
-    FontElem *e = g_hash_table_lookup(font_elem_table, GINT_TO_POINTER(id));
+    FontElem *e = font_elem_list->pdata[id];
     g_assert(e);
-    g_hash_table_remove(font_elem_table, GINT_TO_POINTER(id));
+    font_elem_list->pdata[id] = NULL;
     font_elem_free(e);
 }
 
-static GHashTable *font_metric_table = NULL;
+static GPtrArray *font_metric_list = NULL;
 
 void font_metric_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     FontElem *e = font_elem_new(height, family, style, variant, weight, stretch);
-    if (font_metric_table == NULL) {
-        font_metric_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    if (font_metric_list == NULL) {
+        font_metric_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     }
-    g_hash_table_insert(font_metric_table, GINT_TO_POINTER(id), e);
+    for (int i = font_metric_list->len; i <= id; i++) {
+        g_ptr_array_add(font_metric_list, NULL);
+    }
+    font_metric_list->pdata[id] = e;
 }
 
 void font_metric_rem(int id) {
-    FontElem *e = g_hash_table_lookup(font_metric_table, GINT_TO_POINTER(id));
+    FontElem *e = font_metric_list->pdata[id];
     g_assert(e);
-    g_hash_table_remove(font_metric_table, GINT_TO_POINTER(id));
+    font_metric_list->pdata[id] = NULL;
     font_elem_free(e);
 }
 
 void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_t *ascent, int16_t *descent) {
-    FontElem *f = g_hash_table_lookup(font_metric_table, GINT_TO_POINTER(fontid));
+    FontElem *f = font_metric_list->pdata[fontid];
     g_assert(f);
     *baseline = (int16_t)(pango_layout_get_baseline(f->layout) / PANGO_SCALE);
     PangoFontMetrics *metrics = pango_context_get_metrics(pango_layout_get_context(f->layout), f->desc, NULL);
@@ -231,7 +242,7 @@ void get_font_metrics(int fontid, int16_t *lineheight, int16_t *baseline, int16_
 // text split
 
 int16_t *font_metric_split_text(int fontid, char *text, int edge, int indent) {
-    FontElem *f = g_hash_table_lookup(font_metric_table, GINT_TO_POINTER(fontid));
+    FontElem *f = font_metric_list->pdata[fontid];
     g_assert(f);
     pango_layout_set_wrap(f->layout, PANGO_WRAP_WORD_CHAR);
     pango_layout_set_width(f->layout, PANGO_SCALE * edge);
@@ -260,7 +271,7 @@ int16_t *font_metric_split_text(int fontid, char *text, int edge, int indent) {
 // text rect
 
 void font_metric_rect_text(int fontid, char *text, int16_t *width, int16_t *height) {
-    FontElem *f = g_hash_table_lookup(font_metric_table, GINT_TO_POINTER(fontid));
+    FontElem *f = font_metric_list->pdata[fontid];
     g_assert(f);
     pango_layout_set_text(f->layout, text, -1);
     int w, h;
@@ -281,7 +292,7 @@ static inline void elem_text_draw(cairo_t *cr, DrawElem *e) {
 static inline void elem_text_destroy(DrawElem *e) { g_free(e->data.text.text); }
 
 void elem_text_add(int id, double x, double y, char *text, int fontid, double r, double g, double b, double a) {
-    FontElem *f = g_hash_table_lookup(font_elem_table, GINT_TO_POINTER(fontid));
+    FontElem *f = font_elem_list->pdata[fontid];
     g_assert(f);
     DrawElem *e = g_malloc(sizeof(DrawElem));
     e->type = DRAW_ELEM_TEXT;

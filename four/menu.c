@@ -1,20 +1,25 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
-static GHashTable *menu_table = NULL;
+#define PTR_ARRAY_DEFAULT 16
+
+static GPtrArray *menu_list = NULL;
 
 void menubar_create() {
-    menu_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    menu_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     GMenu *menu = g_menu_new();
-    g_hash_table_insert(menu_table, GINT_TO_POINTER(0), menu);
+    g_ptr_array_add(menu_list, menu);
     gtk_application_set_menubar(app, G_MENU_MODEL(menu));
     g_object_unref(menu);
 }
 
 void menu_node_add(int id, int parent, char *label) {
     GMenu *menu = g_menu_new();
-    g_hash_table_insert(menu_table, GINT_TO_POINTER(id), menu);
-    GMenu *parent_menu = g_hash_table_lookup(menu_table, GINT_TO_POINTER(parent));
+    for (int i = menu_list->len; i <= id; i++) {
+        g_ptr_array_add(menu_list, NULL);
+    }
+    menu_list->pdata[id] = menu;
+    GMenu *parent_menu = menu_list->pdata[parent];
     g_assert(parent_menu);
     g_menu_append_submenu(parent_menu, label, G_MENU_MODEL(menu));
     g_object_unref(menu);
@@ -27,7 +32,7 @@ static void menu_item_click(GSimpleAction *self, GVariant *parameter, gpointer d
 
 void menu_item_add(int id, int parent, char *label, char *action) {
     GMenuItem *item = g_menu_item_new(label, action);
-    GMenu *menu = g_hash_table_lookup(menu_table, GINT_TO_POINTER(parent));
+    GMenu *menu = menu_list->pdata[parent];
     g_assert(menu);
     g_menu_append_item(menu, item);
     g_object_unref(item);

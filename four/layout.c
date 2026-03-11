@@ -1,7 +1,9 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
-static GHashTable *layout_table = NULL;
+#define PTR_ARRAY_DEFAULT 16
+
+static GPtrArray *layout_list = NULL;
 
 typedef struct {
     GtkWidget *layout;
@@ -11,7 +13,7 @@ typedef struct {
 } LayoutMain;
 
 static GtkWidget *layout_main_get_widget(int id) {
-    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutMain *l = layout_list->pdata[id];
     g_assert(l);
     return l->layout;
 }
@@ -36,13 +38,16 @@ static void layout_main_create(int id) {
     gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(top), TRUE);
     gtk_window_present(GTK_WINDOW(top));
 
-    g_hash_table_insert(layout_table, GINT_TO_POINTER(id), l);
+    for (int i = layout_list->len; i <= id; i++) {
+        g_ptr_array_add(layout_list, NULL);
+    }
+    layout_list->pdata[id] = l;
 }
 
 static void layout_main_destroy(int id) {
-    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutMain *l = layout_list->pdata[id];
     g_assert(l);
-    g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
+    layout_list->pdata[id] = NULL;
     layout_signal_disconnect(l->scrolled, l->adjustment);
     gtk_scrolled_window_set_hadjustment(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
     gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(l->scrolled), NULL);
@@ -58,7 +63,7 @@ typedef struct {
 } LayoutElem;
 
 static GtkWidget *layout_node_get_widget(int id) {
-    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = layout_list->pdata[id];
     g_assert(l);
     return l->layout;
 }
@@ -72,19 +77,22 @@ static void layout_node_create(int id, int parent_id) {
     l->x = 0;
     l->y = 0;
     gtk_widget_set_visible(l->layout, TRUE);
-    g_hash_table_insert(layout_table, GINT_TO_POINTER(id), l);
+    for (int i = layout_list->len; i <= id; i++) {
+        g_ptr_array_add(layout_list, NULL);
+    }
+    layout_list->pdata[id] = l;
 }
 
 static void layout_node_destroy(int id) {
-    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = layout_list->pdata[id];
     g_assert(l);
-    g_hash_table_remove(layout_table, GINT_TO_POINTER(id));
+    layout_list->pdata[id] = NULL;
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
     g_free(l);
 }
 
 static void layout_node_size(int id, int x, int y, int width, int height) {
-    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = layout_list->pdata[id];
     g_assert(l);
     l->x = x;
     l->y = y;
@@ -93,7 +101,7 @@ static void layout_node_size(int id, int x, int y, int width, int height) {
 }
 
 static void layout_node_raise(int id) {
-    LayoutElem *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(id));
+    LayoutElem *l = layout_list->pdata[id];
     g_assert(l);
     g_object_ref(l->layout);
     gtk_fixed_remove(GTK_FIXED(l->parent), l->layout);
@@ -109,8 +117,8 @@ GtkWidget *layout_get_widget(int id) {
 }
 
 void layout_create(int id, int parent_id) {
-    if (layout_table == NULL) {
-        layout_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    if (layout_list == NULL) {
+        layout_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     }
     if (id == 1 && parent_id == 0) {
         layout_main_create(id);
@@ -140,7 +148,7 @@ void layout_raise(int id) {
 }
 
 void layout_main_grab_focus() {
-    LayoutMain *l = g_hash_table_lookup(layout_table, GINT_TO_POINTER(1));
+    LayoutMain *l = layout_list->pdata[1];
     g_assert(l);
     gtk_widget_grab_focus(l->scrolled);
 }
