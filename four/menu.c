@@ -1,23 +1,20 @@
+#include "inline.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
-
-#define PTR_ARRAY_DEFAULT 16
 
 static GPtrArray *menu_list = NULL;
 
 void menubar_create() {
-    menu_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
     GMenu *menu = g_menu_new();
-    g_ptr_array_add(menu_list, menu);
+    ptr_array_grow(&menu_list, 0);
+    menu_list->pdata[0] = menu;
     gtk_application_set_menubar(app, G_MENU_MODEL(menu));
     g_object_unref(menu);
 }
 
 void menu_node_add(int id, int parent, char *label) {
     GMenu *menu = g_menu_new();
-    for (int i = menu_list->len; i <= id; i++) {
-        g_ptr_array_add(menu_list, NULL);
-    }
+    ptr_array_grow(&menu_list, id);
     menu_list->pdata[id] = menu;
     GMenu *parent_menu = menu_list->pdata[parent];
     g_assert(parent_menu);

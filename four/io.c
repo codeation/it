@@ -1,10 +1,18 @@
 #include "terminal.h"
 #include <gtk/gtk.h>
 
+enum State {
+    COMMAND, // reading a single-letter command before callback
+    DATA,    // reading user data before callback
+    LEAD,    // reading user data before reading size of allocated buffer
+    SIZE,    // reading size of allocated buffer before reading its contents
+    BUFFER,  // reading contents of the allocated buffer before callback
+};
+
 typedef struct _PipeBuffer {
     char *buffer;
-    gsize size;
-    void (*ready_func)(PipeBuffer *target);
+    uint32_t size;
+    enum State state;
     guint in_id;
     guint hup_id;
     union {
@@ -13,7 +21,7 @@ typedef struct _PipeBuffer {
         struct {
             void (*data_func)(gpointer data);
             char *data;
-            int32_t size;
+            uint32_t size;
         } malloc;
     } way;
 } PipeBuffer;
@@ -22,69 +30,65 @@ static PipeBuffer sync_chan, stream_chan;
 
 gboolean io_is_sync(PipeBuffer *target) { return target == &sync_chan; }
 
-// first way: call command after command byte is ready
+void io_buffer_call(PipeBuffer *target, void *buffer, uint32_t size, void (*call_func)()) {
+    target->buffer = buffer;
+    target->size = size;
+    target->state = DATA;
+    target->way.call_func = call_func;
+}
 
-static void reset_buffer(PipeBuffer *target);
-
-static void call_command(PipeBuffer *target) {
-    reset_buffer(target);
-    callcommand(target->way.command, target);
+void io_buffer_malloc_call(PipeBuffer *target, void *buffer, uint32_t size, void (*data_func)(gpointer data)) {
+    target->way.malloc.data_func = data_func;
+    if (buffer == NULL) {
+        target->buffer = (char *)&(target->way.malloc.size);
+        target->size = sizeof target->way.malloc.size;
+        target->state = SIZE;
+    } else {
+        target->buffer = buffer;
+        target->size = size;
+        target->state = LEAD;
+    }
 }
 
 static void reset_buffer(PipeBuffer *target) {
     target->buffer = &target->way.command;
     target->size = sizeof target->way.command;
-    target->ready_func = call_command;
+    target->state = COMMAND;
 }
 
-// second way: call func after buffer is ready
-
-static void call_buffer_func(PipeBuffer *target) {
-    reset_buffer(target);
-    target->way.call_func();
-}
-
-void io_buffer_call(PipeBuffer *target, void *buffer, int size, void (*call_func)()) {
-    target->buffer = buffer;
-    target->size = size;
-    target->ready_func = call_buffer_func;
-    target->way.call_func = call_func;
-}
-
-// third way: call data func after both buffer and malloc are ready
-
-static void call_data_func(PipeBuffer *target) {
-    reset_buffer(target);
-    target->way.malloc.data_func(target->way.malloc.data); // func must free the data after all
-    // g_free(target->data);
-}
-
-static void read_alloc_data(PipeBuffer *target) {
-    target->way.malloc.data = g_malloc(target->way.malloc.size + 1);
-    target->way.malloc.data[target->way.malloc.size] = 0;
-    if (target->way.malloc.size == 0) {
-        call_data_func(target);
-    } else {
+static void on_data_received(PipeBuffer *target) {
+    switch (target->state) {
+    case COMMAND: // first way: call command after command byte is ready
+        reset_buffer(target);
+        callcommand(target->way.command, target);
+        break;
+    case DATA: // second way: call func after user data is ready
+        reset_buffer(target);
+        target->way.call_func();
+        break;
+    case LEAD: // third way: get size of allocated memory after user data is ready
+        target->buffer = (char *)&(target->way.malloc.size);
+        target->size = sizeof target->way.malloc.size;
+        target->state = SIZE;
+        break;
+    case SIZE: // third way: allocating memory after the size is read
+        target->way.malloc.data = g_malloc(target->way.malloc.size + 1);
+        target->way.malloc.data[target->way.malloc.size] = 0;
+        if (target->way.malloc.size == 0) {
+            reset_buffer(target);
+            target->way.malloc.data_func(target->way.malloc.data); // func must free the data after all
+            // g_free(target->data);
+            break;
+        }
         target->buffer = target->way.malloc.data;
         target->size = target->way.malloc.size;
-        target->ready_func = call_data_func;
-    }
-}
-
-static void read_alloc_size(PipeBuffer *target) {
-    target->buffer = (char *)&(target->way.malloc.size);
-    target->size = sizeof target->way.malloc.size;
-    target->ready_func = read_alloc_data;
-}
-
-void io_buffer_malloc_call(PipeBuffer *target, void *buffer, int size, void (*data_func)(gpointer data)) {
-    target->way.malloc.data_func = data_func;
-    if (buffer == NULL) {
-        read_alloc_size(target);
-    } else {
-        target->buffer = buffer;
-        target->size = size;
-        target->ready_func = read_alloc_size;
+        target->state = BUFFER;
+        break;
+    case BUFFER: // third way: call data func after user data and allocated memory are ready
+        reset_buffer(target);
+        target->way.malloc.data_func(target->way.malloc.data); // func must free the data after all
+        // g_free(target->data);
+        break;
     }
 }
 
@@ -103,7 +107,7 @@ static gboolean async_read_chan(GIOChannel *source, GIOCondition condition, gpoi
                 return TRUE;
             }
             // else call next func after getting data
-            target->ready_func(target);
+            on_data_received(target);
             break;
         case G_IO_STATUS_AGAIN:
             // no more data

@@ -13,8 +13,9 @@ _Static_assert(sizeof(GeneralEvent) == 4, "wrong GeneralEvent align");
 
 static gboolean on_delete(GtkWidget *widget, gpointer data) {
     char command_type = 'g';
-    GeneralEvent e;
-    e.id = GENERAL_EVENT_DESTROY;
+    GeneralEvent e = {
+        .id = GENERAL_EVENT_DESTROY,
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -56,11 +57,12 @@ static void on_configure_event(gpointer data) {
     }
     gint width, height;
     gtk_window_get_default_size(GTK_WINDOW(top), &width, &height);
-    ConfigureEvent e;
-    e.width = width;
-    e.height = height;
-    e.inner_width = inner_width;
-    e.inner_height = inner_height;
+    ConfigureEvent e = {
+        .width = width,
+        .height = height,
+        .inner_width = inner_width,
+        .inner_height = inner_height,
+    };
     write_configure_event_once(&e);
 }
 
@@ -102,12 +104,13 @@ _Static_assert(sizeof(KeyboardEvent) == 8, "wrong KeyboardEvent align");
 static gboolean key_pressed(GtkEventControllerKey *self, guint keyval, guint keycode, GdkModifierType state,
                             gpointer data) {
     char command_type = 'k';
-    KeyboardEvent e;
-    e.unicode = gdk_keyval_to_unicode(keyval);
-    e.shift = state & GDK_SHIFT_MASK ? 1 : 0;
-    e.control = state & GDK_CONTROL_MASK ? 1 : 0;
-    e.alt = state & GDK_ALT_MASK ? 1 : 0;
-    e.meta = state & GDK_META_MASK ? 1 : 0;
+    KeyboardEvent e = {
+        .unicode = gdk_keyval_to_unicode(keyval),
+        .shift = state & GDK_SHIFT_MASK ? 1 : 0,
+        .control = state & GDK_CONTROL_MASK ? 1 : 0,
+        .alt = state & GDK_ALT_MASK ? 1 : 0,
+        .meta = state & GDK_META_MASK ? 1 : 0,
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     const char *name = gdk_keyval_name(keyval);
@@ -150,11 +153,12 @@ static void button_pressed(GtkGestureClick *self, gint n_press, gdouble x, gdoub
     prev_button_time = gdk_event_get_time(event);
     prev_button_type = gdk_event_get_event_type(event);
     char command_type = 'b';
-    ButtonEvent e;
-    e.type = buttonType(n_press);
-    e.button = gdk_button_event_get_button(event);
-    e.x = (int16_t)lrint(x);
-    e.y = (int16_t)lrint(y);
+    ButtonEvent e = {
+        .type = buttonType(n_press),
+        .button = gdk_button_event_get_button(event),
+        .x = (int16_t)lrint(x),
+        .y = (int16_t)lrint(y),
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -168,11 +172,12 @@ static void button_released(GtkGestureClick *self, gint n_press, gdouble x, gdou
     prev_button_time = gdk_event_get_time(event);
     prev_button_type = gdk_event_get_event_type(event);
     char command_type = 'b';
-    ButtonEvent e;
-    e.type = 7;
-    e.button = gdk_button_event_get_button(event);
-    e.x = (int16_t)lrint(x);
-    e.y = (int16_t)lrint(y);
+    ButtonEvent e = {
+        .type = 7,
+        .button = gdk_button_event_get_button(event),
+        .x = (int16_t)lrint(x),
+        .y = (int16_t)lrint(y),
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -198,13 +203,14 @@ static void motion_notify(GtkEventControllerMotion *self, gdouble x, gdouble y, 
     prev_button_type = gdk_event_get_event_type(event);
     char command_type = 'm';
     GdkModifierType state = gdk_event_get_modifier_state(event);
-    MotionEvent e;
-    e.x = (int16_t)lrint(x);
-    e.y = (int16_t)lrint(y);
-    e.shift = state & GDK_SHIFT_MASK ? 1 : 0;
-    e.control = state & GDK_CONTROL_MASK ? 1 : 0;
-    e.alt = state & GDK_ALT_MASK ? 1 : 0;
-    e.meta = state & GDK_META_MASK ? 1 : 0;
+    MotionEvent e = {
+        .x = (int16_t)lrint(x),
+        .y = (int16_t)lrint(y),
+        .shift = state & GDK_SHIFT_MASK ? 1 : 0,
+        .control = state & GDK_CONTROL_MASK ? 1 : 0,
+        .alt = state & GDK_ALT_MASK ? 1 : 0,
+        .meta = state & GDK_META_MASK ? 1 : 0,
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -219,10 +225,11 @@ _Static_assert(sizeof(ScrollEvent) == 6, "wrong ScrollEvent align");
 
 static gboolean scroll_notify(GtkEventControllerScroll *self, gdouble dx, gdouble dy, gpointer data) {
     char command_type = 's';
-    ScrollEvent e;
-    e.direction = 4;
-    e.delta_x = (int16_t)lrint(dx);
-    e.delta_y = (int16_t)lrint(dy);
+    ScrollEvent e = {
+        .direction = 4,
+        .delta_x = (int16_t)lrint(dx),
+        .delta_y = (int16_t)lrint(dy),
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_flush();
@@ -253,8 +260,9 @@ static void clipboard_text_received(GObject *source_object, GAsyncResult *res, g
         return;
     }
     char command_type = 'c';
-    ClipboardEvent e;
-    e.format = 1;
+    ClipboardEvent e = {
+        .format = 1,
+    };
     pipe_event_write(&command_type, sizeof command_type);
     pipe_event_write(&e, sizeof e);
     pipe_event_write_string(text);

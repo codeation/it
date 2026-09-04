@@ -4,7 +4,7 @@ LDFLAGS=$(shell pkg-config --libs gtk4)
 it: call.o draw.o event.o io.o layout.o main.o menu.o pipe.o version.o window.o
 	gcc -o it call.o draw.o event.o io.o layout.o main.o menu.o pipe.o version.o window.o $(LDFLAGS) -Wall -O3 -ffast-math -lm
 
-%.o: %.c terminal.h
+%.o: %.c inline.h terminal.h
 	gcc -c $(CFLAGS) -Wall -O3 -ffast-math $<
 
 clean:
@@ -12,6 +12,7 @@ clean:
 	rm it
 
 format:
+	clang-format -i inline.h
 	clang-format -i terminal.h
 	clang-format -i call.c
 	clang-format -i draw.c

@@ -1,7 +1,6 @@
+#include "inline.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
-
-#define PTR_ARRAY_DEFAULT 16
 
 // draw elem
 
@@ -138,12 +137,7 @@ void bitmap_add(int id, int width, int height, unsigned char *data) {
     e->width = width;
     e->height = height;
     e->bitmap = cairo_image_surface_create_for_data(e->data, cairo_format, width, height, stride);
-    if (bitmap_list == NULL) {
-        bitmap_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
-    }
-    for (int i = bitmap_list->len; i <= id; i++) {
-        g_ptr_array_add(bitmap_list, NULL);
-    }
+    ptr_array_grow(&bitmap_list, id);
     bitmap_list->pdata[id] = e;
 }
 
@@ -215,12 +209,7 @@ static GPtrArray *font_elem_list = NULL;
 
 void font_elem_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     FontElem *e = font_elem_new(height, family, style, variant, weight, stretch);
-    if (font_elem_list == NULL) {
-        font_elem_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
-    }
-    for (int i = font_elem_list->len; i <= id; i++) {
-        g_ptr_array_add(font_elem_list, NULL);
-    }
+    ptr_array_grow(&font_elem_list, id);
     font_elem_list->pdata[id] = e;
 }
 
@@ -235,12 +224,7 @@ static GPtrArray *font_metric_list = NULL;
 
 void font_metric_add(int id, int height, char *family, int style, int variant, int weight, int stretch) {
     FontElem *e = font_elem_new(height, family, style, variant, weight, stretch);
-    if (font_metric_list == NULL) {
-        font_metric_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
-    }
-    for (int i = font_metric_list->len; i <= id; i++) {
-        g_ptr_array_add(font_metric_list, NULL);
-    }
+    ptr_array_grow(&font_metric_list, id);
     font_metric_list->pdata[id] = e;
 }
 

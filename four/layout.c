@@ -1,7 +1,6 @@
+#include "inline.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
-
-#define PTR_ARRAY_DEFAULT 16
 
 static GPtrArray *layout_list = NULL;
 
@@ -38,9 +37,7 @@ static void layout_main_create(int id) {
     gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(top), TRUE);
     gtk_window_present(GTK_WINDOW(top));
 
-    for (int i = layout_list->len; i <= id; i++) {
-        g_ptr_array_add(layout_list, NULL);
-    }
+    ptr_array_grow(&layout_list, id);
     layout_list->pdata[id] = l;
 }
 
@@ -77,9 +74,7 @@ static void layout_node_create(int id, int parent_id) {
     l->x = 0;
     l->y = 0;
     gtk_widget_set_visible(l->layout, TRUE);
-    for (int i = layout_list->len; i <= id; i++) {
-        g_ptr_array_add(layout_list, NULL);
-    }
+    ptr_array_grow(&layout_list, id);
     layout_list->pdata[id] = l;
 }
 
@@ -117,9 +112,6 @@ GtkWidget *layout_get_widget(int id) {
 }
 
 void layout_create(int id, int parent_id) {
-    if (layout_list == NULL) {
-        layout_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
-    }
     if (id == 1 && parent_id == 0) {
         layout_main_create(id);
     } else {

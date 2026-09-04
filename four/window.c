@@ -1,7 +1,6 @@
+#include "inline.h"
 #include "terminal.h"
 #include <gtk/gtk.h>
-
-#define PTR_ARRAY_DEFAULT 16
 
 typedef struct {
     GtkWidget *draw;
@@ -28,12 +27,7 @@ void window_create(int id, int layout_id) {
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(w->draw), draw_callback, w->draw_list, NULL);
     gtk_fixed_put(GTK_FIXED(w->layout), w->draw, 0, 0);
     gtk_widget_set_visible(w->draw, TRUE);
-    if (window_list == NULL) {
-        window_list = g_ptr_array_sized_new(PTR_ARRAY_DEFAULT);
-    }
-    for (int i = window_list->len; i <= id; i++) {
-        g_ptr_array_add(window_list, NULL);
-    }
+    ptr_array_grow(&window_list, id);
     window_list->pdata[id] = w;
 }
 
