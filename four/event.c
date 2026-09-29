@@ -292,7 +292,7 @@ void top_signal_connect() { g_signal_connect(top, "close-request", G_CALLBACK(on
 void top_signal_disconnect() { g_signal_handlers_disconnect_by_func(top, G_CALLBACK(on_delete), NULL); }
 
 static GtkEventController *keyEventController;
-static GtkGesture *getstureConroller;
+static GtkGesture *gestureController;
 static GtkEventController *motionEventController;
 static GtkEventController *scrollEventController;
 
@@ -306,13 +306,13 @@ void layout_signal_connect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
     g_signal_connect(keyEventController, "key-pressed", G_CALLBACK(key_pressed), NULL);
     gtk_widget_add_controller(scrolled, keyEventController);
 
-    getstureConroller = gtk_gesture_click_new();
-    gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(getstureConroller), 0);
-    gtk_gesture_single_set_touch_only(GTK_GESTURE_SINGLE(getstureConroller), FALSE);
-    g_signal_connect(getstureConroller, "pressed", G_CALLBACK(button_pressed), NULL);
-    g_signal_connect(getstureConroller, "released", G_CALLBACK(button_released), NULL);
-    g_signal_connect(getstureConroller, "unpaired-release", G_CALLBACK(button_released), NULL);
-    gtk_widget_add_controller(scrolled, GTK_EVENT_CONTROLLER(getstureConroller));
+    gestureController = gtk_gesture_click_new();
+    gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gestureController), 0);
+    gtk_gesture_single_set_touch_only(GTK_GESTURE_SINGLE(gestureController), FALSE);
+    g_signal_connect(gestureController, "pressed", G_CALLBACK(button_pressed), NULL);
+    g_signal_connect(gestureController, "released", G_CALLBACK(button_released), NULL);
+    g_signal_connect(gestureController, "unpaired-release", G_CALLBACK(button_released), NULL);
+    gtk_widget_add_controller(scrolled, GTK_EVENT_CONTROLLER(gestureController));
 
     motionEventController = gtk_event_controller_motion_new();
     g_signal_connect(motionEventController, "motion", G_CALLBACK(motion_notify), NULL);
@@ -329,8 +329,8 @@ void layout_signal_disconnect(GtkWidget *scrolled, GtkAdjustment *adjustment) {
 
     g_signal_handlers_disconnect_by_func(keyEventController, G_CALLBACK(key_pressed), NULL);
 
-    g_signal_handlers_disconnect_by_func(getstureConroller, G_CALLBACK(button_pressed), NULL);
-    g_signal_handlers_disconnect_by_func(getstureConroller, G_CALLBACK(button_released), NULL);
+    g_signal_handlers_disconnect_by_func(gestureController, G_CALLBACK(button_pressed), NULL);
+    g_signal_handlers_disconnect_by_func(gestureController, G_CALLBACK(button_released), NULL);
 
     g_signal_handlers_disconnect_by_func(motionEventController, G_CALLBACK(motion_notify), NULL);
 
