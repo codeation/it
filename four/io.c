@@ -60,7 +60,7 @@ static void on_data_received(PipeBuffer *target) {
     switch (target->state) {
     case COMMAND: // first way: call command after command byte is ready
         reset_buffer(target);
-        callcommand(target->way.command, target);
+        call_command(target->way.command, target);
         break;
     case DATA: // second way: call func after user data is ready
         reset_buffer(target);

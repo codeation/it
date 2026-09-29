@@ -45,7 +45,7 @@ void set_clipboard(int clipboardtypeid, void *data);
 
 // call
 
-void callcommand(char command, PipeBuffer *target);
+void call_command(char command, PipeBuffer *target);
 
 // layout
 
